@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using vulnerable_api.Data;
 using vulnerable_api.Models;
@@ -16,6 +17,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "admin")]
     public IActionResult GetUsers()
     {
         var users = _db.Users.ToList();
@@ -70,19 +72,20 @@ public class UsersController : ControllerBase
 
         return Ok(user);
     }
-[HttpDelete("{id}")]
-public IActionResult DeleteUser(int id)
-{
-    var user = _db.Users.Find(id);
 
-    if (user == null)
+    [HttpDelete("{id}")]
+    public IActionResult DeleteUser(int id)
     {
-        return NotFound();
+        var user = _db.Users.Find(id);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        _db.Users.Remove(user);
+        _db.SaveChanges();
+
+        return NoContent();
     }
-
-    _db.Users.Remove(user);
-    _db.SaveChanges();
-
-    return NoContent();
-}
 }

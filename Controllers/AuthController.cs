@@ -1,4 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using vulnerable_api.Data;
 using vulnerable_api.Models;
 
@@ -45,6 +49,30 @@ public class AuthController : ControllerBase
             return Unauthorized();
         }
 
-        return Ok(user);
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Role, user.Role)
+        };
+
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes("super-secret-development-key-12345"));
+
+        var credentials = new SigningCredentials(
+            key,
+            SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: "vulnerable-api",
+            audience: "vulnerable-api",
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(1),
+            signingCredentials: credentials);
+
+        return Ok(new
+        {
+            token = new JwtSecurityTokenHandler().WriteToken(token)
+        });
     }
 }
