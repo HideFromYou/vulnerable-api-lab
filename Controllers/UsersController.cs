@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using vulnerable_api.Data;
 using vulnerable_api.Models;
 
@@ -87,5 +88,19 @@ public class UsersController : ControllerBase
         _db.SaveChanges();
 
         return NoContent();
+    }
+
+    [HttpGet("search")]
+public IActionResult Search(string username)
+{
+    var sql = "SELECT * FROM Users WHERE Username = @username";
+
+    var users = _db.Users
+        .FromSqlRaw(
+            sql,
+            new Microsoft.Data.Sqlite.SqliteParameter("@username", username))
+        .ToList();
+
+    return Ok(users);
     }
 }

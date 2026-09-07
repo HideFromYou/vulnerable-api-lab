@@ -1,0 +1,99 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f1ea;
+    color: #222;
+}
+
+header {
+    background: #222;
+    color: #f4d35e;
+    padding: 30px;
+    text-align: center;
+    border-bottom: 6px solid #f4d35e;
+}
+
+header h1 {
+    margin: 0 0 10px;
+    font-size: 32px;
+}
+
+header p {
+    margin: 0;
+    color: #fff;
+}
+
+main {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+section {
+    background: #fff;
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 3px solid #222;
+    border-radius: 12px;
+    box-shadow: 6px 6px 0 #222;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+input {
+    padding: 12px;
+    border: 2px solid #222;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+button {
+    padding: 12px 18px;
+    background: #f4d35e;
+    color: #222;
+    border: 2px solid #222;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+#login-message {
+    font-weight: bold;
+}
+
+#users-container {
+    margin-top: 20px;
+}
+
+.user-card {
+    padding: 15px;
+    margin-bottom: 12px;
+    border: 2px solid #222;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.user-card h3 {
+    margin-top: 0;
+}
+
+.user-card p {
+    margin: 6px 0;
+}
