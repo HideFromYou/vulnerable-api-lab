@@ -72,17 +72,28 @@ loadUsersButton.addEventListener("click", async () => {
 
             card.className = "user-card";
 
-            card.innerHTML = `
-                <h3>${user.username}</h3>
-                <p><strong>ID:</strong> ${user.id}</p>
-                <p><strong>Email:</strong> ${user.email}</p>
-                <p><strong>Role:</strong> ${user.role}</p>
-            `;
+     card.innerHTML = `
+    <h3></h3>
+    <p><strong>ID:</strong> ${user.id}</p>
+    <p><strong>Email:</strong> ${user.email}</p>
+    <p><strong>Role:</strong> ${user.role}</p>
+`;
 
+card.querySelector("h3").textContent = user.username;
             usersContainer.appendChild(card);
         });
     } catch (error) {
         console.error(error);
         usersContainer.textContent = "Could not connect to API.";
     }
+
+    
 });
+
+
+const params = new URLSearchParams(window.location.search);
+const input = params.get("input");
+
+if (input) {
+    document.getElementById("search-result").textContent = input;
+}

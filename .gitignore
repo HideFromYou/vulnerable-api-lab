@@ -3,3 +3,8 @@ obj/
 *.db
 .vscode/
 .DS_Store
+# Pentest test artifacts
+secret.txt
+test.php
+test.txt
+uploads/

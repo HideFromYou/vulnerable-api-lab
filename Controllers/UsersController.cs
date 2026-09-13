@@ -26,7 +26,7 @@ public class UsersController : ControllerBase
         return Ok(users);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public IActionResult GetUser(int id)
     {
         var user = _db.Users.Find(id);
@@ -91,16 +91,85 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("search")]
-public IActionResult Search(string username)
-{
-    var sql = "SELECT * FROM Users WHERE Username = @username";
+    public IActionResult Search(string username)
+    {
+        var sql = "SELECT * FROM Users WHERE Username = @username";
 
-    var users = _db.Users
-        .FromSqlRaw(
-            sql,
-            new Microsoft.Data.Sqlite.SqliteParameter("@username", username))
-        .ToList();
+        var users = _db.Users
+            .FromSqlRaw(
+                sql,
+                new Microsoft.Data.Sqlite.SqliteParameter("@username", username))
+            .ToList();
 
-    return Ok(users);
+        return Ok(users);
     }
+
+    [HttpGet("reflect")]
+    public IActionResult Reflect(string input)
+    {
+        return Content($"You searched for: {input}", "text/html");
+    }
+
+    [HttpGet("js")]
+    public IActionResult Js(string name)
+    {
+        return Content(
+            $"<script>let username = \"{name}\";</script>",
+            "text/html"
+        );
+    }
+
+    [HttpGet("file")]
+    public IActionResult GetFile(string name)
+    {
+        var path = Path.Combine("uploads", name);
+
+        if (!System.IO.File.Exists(path))
+        {
+            return NotFound();
+        }
+
+        var content = System.IO.File.ReadAllText(path);
+
+        return Ok(content);
+    }
+
+    [HttpGet("ping")]
+public IActionResult Ping(string host)
+{
+    var command = $"ping -c 1 {host}";
+    var result = System.Diagnostics.Process.Start(
+        new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "/bin/sh",
+            Arguments = $"-c \"{command}\"",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        });
+
+    var output = result?.StandardOutput.ReadToEnd();
+
+    return Ok(output);
+}
+[HttpPost("upload")]
+public async Task<IActionResult> Upload(IFormFile file)
+{
+    var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+
+    Directory.CreateDirectory(uploadsPath);
+
+    var filePath = Path.Combine(uploadsPath, file.FileName);
+
+    using var stream = new FileStream(filePath, FileMode.Create);
+
+    await file.CopyToAsync(stream);
+
+    return Ok(new
+    {
+        fileName = file.FileName,
+        path = filePath
+    });
+}
+
 }
