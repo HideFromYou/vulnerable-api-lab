@@ -4,6 +4,14 @@ Intentionally vulnerable full-stack user management API built for penetration te
 
 The project simulates a small real-world API and is progressively developed to contain common web and API security vulnerabilities.
 
+The goal is to follow a realistic penetration testing workflow rather than simply identifying vulnerabilities.
+
+```text
+Build → Identify → Hypothesize → Test → Exploit → Assess Impact → Remediate → Retest
+```
+
+---
+
 ## Overview
 
 The application consists of:
@@ -18,11 +26,9 @@ The application consists of:
 - REST API endpoints
 - Intentionally vulnerable components for security testing
 
-The goal is to follow a realistic penetration testing workflow rather than simply identifying vulnerabilities.
+The project is designed as a practical penetration testing laboratory where vulnerabilities are intentionally introduced, manually tested, exploited, remediated, and retested.
 
-```text
-Build → Identify → Hypothesize → Test → Exploit → Assess Impact → Remediate → Retest
-```
+---
 
 ## Architecture
 
@@ -46,6 +52,8 @@ ASP.NET Core Web API
         SQLite
 ```
 
+---
+
 ## Security Testing
 
 Security testing is performed manually using:
@@ -55,9 +63,33 @@ Security testing is performed manually using:
 - Burp Suite
 - Manual HTTP requests
 - JWT inspection and manipulation
-- Request/response analysis
+- Request / response analysis
 
 Testing focuses on understanding how the application behaves from an attacker's perspective.
+
+The project follows a practical methodology:
+
+```text
+Understand Application
+        ↓
+Identify Attack Surface
+        ↓
+Hypothesize
+        ↓
+Test
+        ↓
+Confirm Vulnerability
+        ↓
+Exploit
+        ↓
+Assess Impact
+        ↓
+Remediate
+        ↓
+Retest
+```
+
+---
 
 ## Confirmed Security Findings
 
@@ -81,6 +113,8 @@ Testing focuses on understanding how the application behaves from an attacker's 
 
 Additional vulnerabilities will be introduced and tested as the security lab develops.
 
+---
+
 ## API Endpoints
 
 | Method | Endpoint | Description |
@@ -99,6 +133,8 @@ Additional vulnerabilities will be introduced and tested as the security lab dev
 | GET | `/api/users/ping` | Command injection testing endpoint |
 | POST | `/api/users/upload` | File upload endpoint |
 
+---
+
 ## Authentication & Authorization
 
 The application uses JWT-based authentication.
@@ -116,7 +152,7 @@ Testing performed includes:
 - Authorization boundary testing
 - Privilege escalation testing
 
-Example authorization flow:
+### Authorization Flow
 
 ```text
 Unauthenticated Request
@@ -130,10 +166,12 @@ Authenticated User
         ▼
    Role Validation
       /       \
-    user     admin
+    user      admin
      │          │
     403        200
 ```
+
+---
 
 ## BOLA / IDOR Testing
 
@@ -154,6 +192,26 @@ GET /api/users/3
 ```
 
 The API authenticated the requester but failed to verify whether the requester was authorized to access the requested object.
+
+### Testing Flow
+
+```text
+Authenticated User
+        │
+        ▼
+Access Own Object
+        │
+        ▼
+Change Object ID
+        │
+        ▼
+Access Another User's Object
+        │
+        ▼
+Unauthorized Access
+```
+
+---
 
 ## Mass Assignment & Privilege Escalation
 
@@ -177,18 +235,22 @@ The new token was then used to access administrator-only functionality.
 
 ```text
 Normal User
-    │
-    │ role manipulation
-    ▼
+     │
+     │ role manipulation
+     ▼
 Admin User
-    │
-    │ fresh authentication
-    ▼
+     │
+     │ fresh authentication
+     ▼
 JWT with admin role
-    │
-    ▼
+     │
+     ▼
 Administrator-only functionality
 ```
+
+This demonstrated how mass assignment can lead to privilege escalation when sensitive authorization properties are accepted directly from the client.
+
+---
 
 ## SQL Injection
 
@@ -200,27 +262,138 @@ GET /api/users/search?username=
 
 The original implementation constructed SQL using direct string interpolation.
 
-Testing demonstrated successful SQL injection using a URL-encoded payload.
+Testing demonstrated successful SQL injection using manually crafted input.
 
-The vulnerability was then remediated using a parameterized query with `SqliteParameter`.
+The SQL injection testing process included:
 
-The same injection payload was used during retesting.
+```text
+Baseline Request
+      ↓
+Injection Character
+      ↓
+Boolean Testing
+      ↓
+Column Count Enumeration
+      ↓
+UNION-Based Testing
+      ↓
+Data Extraction
+      ↓
+Schema Enumeration
+      ↓
+Impact Assessment
+```
+
+### Error-Based SQL Injection
+
+An initial injection character produced a database error.
+
+The application exposed detailed development information through the response, including:
+
+- Database exception
+- SQL error
+- Application stack trace
+- Controller information
+- Internal source path
+- Source code line information
+
+This demonstrated both SQL injection behavior and error information disclosure.
+
+### Boolean-Based SQL Injection
+
+Boolean conditions were used to compare application behavior between true and false SQL conditions.
+
+```text
+TRUE condition
+    ↓
+Expected query behavior
+
+FALSE condition
+    ↓
+Different application behavior
+```
+
+This allowed SQL injection to be confirmed without relying only on database errors.
+
+### Column Count Enumeration
+
+`ORDER BY` testing was used to determine the number of columns returned by the vulnerable query.
+
+The application response changed when an invalid column position was supplied.
+
+This established the number of columns required for subsequent UNION-based testing.
+
+### UNION-Based SQL Injection
+
+After determining the column count, UNION-based queries were used to identify which result positions were reflected into the API response.
+
+A controlled query such as:
+
+```sql
+UNION SELECT 1,2,3,4,5
+```
+
+was used to map database result positions to API response fields.
+
+### Data Extraction
+
+After identifying useful result positions, the test was extended to retrieve records from the application's `Users` table.
+
+### Schema Enumeration
+
+SQLite's `sqlite_master` system table was used to enumerate database metadata.
+
+Example:
+
+```sql
+SELECT name FROM sqlite_master;
+```
+
+The database schema was then queried to identify the structure of the `Users` table.
+
+The testing demonstrated the typical SQL injection workflow:
+
+```text
+Confirm SQLi
+    ↓
+Determine Query Behavior
+    ↓
+Determine Column Count
+    ↓
+Identify UNION Positions
+    ↓
+Identify Tables
+    ↓
+Identify Columns
+    ↓
+Extract Relevant Data
+    ↓
+Assess Impact
+```
+
+### Remediation
+
+The vulnerable string-interpolated query was replaced with a parameterized query using `SqliteParameter`.
+
+The same injection payload was then used during retesting.
 
 ```text
 Vulnerable Query
-      │
-      ▼
+       │
+       ▼
 SQL Injection Exploitation
-      │
-      ▼
+       │
+       ▼
 Parameterized Query
-      │
-      ▼
+       │
+       ▼
 Retest with Same Payload
-      │
-      ▼
+       │
+       ▼
 Injection No Longer Successful
 ```
+
+---
 
 ## Cross-Site Scripting (XSS)
 
@@ -234,27 +407,39 @@ Testing included:
 - JavaScript-context XSS
 - HTML-context XSS
 
-The stored and DOM-based XSS vulnerabilities were remediated by replacing unsafe HTML rendering with safer DOM APIs such as `textContent`.
-
-The testing demonstrated the importance of understanding:
+The testing demonstrated that XSS should be analyzed according to how attacker-controlled data flows through the application rather than treating it as a single vulnerability type.
 
 ```text
-Source → Data Flow → Sink → Execution Context
+Source
+   ↓
+User-Controlled Data
+   ↓
+Data Flow
+   ↓
+Sink
+   ↓
+Execution Context
+   ↓
+JavaScript Execution
 ```
 
-rather than treating XSS as a single vulnerability type.
+The stored and DOM-based XSS vulnerabilities were remediated by replacing unsafe HTML rendering with safer DOM APIs such as `textContent`.
+
+---
 
 ## Path Traversal
 
 A file retrieval endpoint was tested for directory traversal by manipulating the user-controlled filename parameter.
 
-Baseline request:
+### Baseline Request
 
 ```http
 GET /api/users/file?name=test.txt
 ```
 
-Testing demonstrated that relative path traversal could escape the intended directory:
+Testing demonstrated that relative path traversal could escape the intended directory.
+
+Example:
 
 ```http
 GET /api/users/file?name=../secret.txt
@@ -262,11 +447,27 @@ GET /api/users/file?name=../secret.txt
 
 This allowed retrieval of a file located outside the intended upload directory.
 
+### Testing Flow
+
+```text
+Expected File
+     ↓
+Modify Filename
+     ↓
+Path Traversal Sequence
+     ↓
+Escape Intended Directory
+     ↓
+Access External File
+```
+
+---
+
 ## Command Injection
 
 The API contains a ping endpoint that passes user-controlled input to a shell command.
 
-Baseline request:
+### Baseline Request
 
 ```http
 GET /api/users/ping?host=127.0.0.1
@@ -282,6 +483,22 @@ GET /api/users/ping?host=127.0.0.1;whoami
 
 The vulnerability was validated using harmless read-only commands in the local lab environment.
 
+### Testing Flow
+
+```text
+Expected Host Input
+       ↓
+Modify Parameter
+       ↓
+Shell Metacharacter
+       ↓
+Additional Command
+       ↓
+Command Execution
+```
+
+---
+
 ## Insecure File Upload
 
 The file upload endpoint was tested for insufficient file type validation.
@@ -290,7 +507,9 @@ Testing demonstrated that files with arbitrary extensions, including `.php`, cou
 
 The uploaded file was then verified through the application's file retrieval functionality.
 
-The test demonstrated that accepting files based primarily on their filename extension can introduce security risks.
+The test demonstrated that accepting files primarily based on their filename extension can introduce security risks.
+
+---
 
 ## Information Disclosure
 
@@ -298,9 +517,23 @@ API responses were tested for excessive exposure of sensitive information.
 
 Testing demonstrated that user objects returned sensitive fields including plaintext passwords.
 
+Example response:
+
+```json
+{
+  "id": 3,
+  "username": "george.alaman",
+  "email": "alaman@example.com",
+  "password": "password123",
+  "role": "admin"
+}
+```
+
 The upload functionality also returned the server-side filesystem path in its response.
 
 This demonstrates the risk of returning internal or sensitive application data directly to clients.
+
+---
 
 ## Missing Rate Limiting
 
@@ -315,6 +548,22 @@ HTTP/1.1 401 Unauthorized
 without visible throttling, account lockout, or rate limiting.
 
 This demonstrates a potential brute-force protection weakness.
+
+### Testing Flow
+
+```text
+Failed Login
+     ↓
+Failed Login
+     ↓
+Failed Login
+     ↓
+Repeated Requests Accepted
+     ↓
+No Visible Throttling
+```
+
+---
 
 ## JWT Security Testing
 
@@ -331,9 +580,13 @@ Testing included:
 - Bearer token handling
 - Authorization behavior based on JWT claims
 
-The project also contains a hardcoded JWT signing secret for laboratory purposes.
+### JWT Structure
 
-JWTs were treated as signed tokens rather than encrypted data.
+```text
+Header.Payload.Signature
+```
+
+JWTs were analyzed as signed tokens rather than encrypted data.
 
 ```text
 Header
@@ -342,8 +595,26 @@ Payload
    +
 Signature
    ↓
-JWT
+ JWT
 ```
+
+### JWT Role Claim Testing
+
+The JWT role claim was manipulated during testing to determine whether changing the Base64URL-encoded payload alone would result in elevated privileges.
+
+The modified token was rejected because the signature no longer matched the modified payload.
+
+This demonstrated the importance of JWT signature validation.
+
+### Hardcoded JWT Secret
+
+The project also contains a hardcoded JWT signing secret for laboratory purposes.
+
+This is intentionally insecure and exists to provide a realistic example of why cryptographic secrets should not be stored directly in application source code.
+
+The secret is used only for the intentionally vulnerable local laboratory environment and should never be used in production.
+
+---
 
 ## Frontend
 
@@ -358,6 +629,8 @@ The frontend is used for:
 - Browser DevTools testing
 - Burp Suite interception
 - XSS testing
+
+---
 
 ## Tech Stack
 
@@ -387,9 +660,13 @@ The frontend is used for:
 - Git
 - GitHub
 
+---
+
 ## Running Locally
 
 ### Start the API
+
+From the project root:
 
 ```bash
 dotnet restore
@@ -417,6 +694,8 @@ The frontend is then available at:
 ```text
 http://localhost:5500
 ```
+
+---
 
 ## Project Structure
 
@@ -447,6 +726,8 @@ vulnerable-api/
 ├── README.md
 └── vulnerable-api.csproj
 ```
+
+---
 
 ## Project Status
 
@@ -492,6 +773,8 @@ Current security testing coverage includes:
 - Hardcoded JWT Secret
 
 The lab will continue to evolve with additional vulnerabilities, remediation scenarios, retesting, and security assessment documentation.
+
+---
 
 ## Disclaimer
 
