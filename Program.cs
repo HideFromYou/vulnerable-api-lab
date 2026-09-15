@@ -7,6 +7,7 @@ using vulnerable_api.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddAntiforgery();
 
 builder.Services.AddCors(options =>
 {

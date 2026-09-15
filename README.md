@@ -49,7 +49,7 @@ ASP.NET Core Web API
    └── Entity Framework Core
            │
            ▼
-        SQLite
+         SQLite
 ```
 
 ---
@@ -110,6 +110,7 @@ Retest
 | Missing Rate Limiting | Confirmed | Repeated failed authentication attempts were accepted without throttling or lockout |
 | JWT Security Testing | Tested | Token structure, claims, signature validation, and role claims analyzed |
 | Hardcoded JWT Secret | Identified | Sensitive signing key stored directly in application source code |
+| CSRF | Remediated + Retested | Authenticated state-changing request could initially be forged through a malicious page |
 
 Additional vulnerabilities will be introduced and tested as the security lab develops.
 
@@ -132,6 +133,8 @@ Additional vulnerabilities will be introduced and tested as the security lab dev
 | GET | `/api/users/file` | File retrieval endpoint |
 | GET | `/api/users/ping` | Command injection testing endpoint |
 | POST | `/api/users/upload` | File upload endpoint |
+| POST | `/api/csrf/login` | Cookie-based CSRF demonstration login |
+| POST | `/api/csrf/change-email` | CSRF testing endpoint for state-changing requests |
 
 ---
 
@@ -595,7 +598,7 @@ Payload
    +
 Signature
    ↓
- JWT
+JWT
 ```
 
 ### JWT Role Claim Testing
@@ -616,6 +619,177 @@ The secret is used only for the intentionally vulnerable local laboratory enviro
 
 ---
 
+## Cross-Site Request Forgery (CSRF)
+
+A separate intentionally vulnerable cookie-based authentication flow was introduced to demonstrate classical CSRF.
+
+The main application uses JWT authentication through the `Authorization: Bearer` header. Traditional CSRF is generally not applicable to this flow because the browser does not automatically attach the JWT as an `Authorization` header.
+
+A dedicated cookie-based demonstration endpoint was therefore created for controlled testing.
+
+### CSRF Concept
+
+CSRF occurs when an attacker tricks an authenticated user's browser into sending an unwanted state-changing request to a vulnerable application.
+
+The attack relies on authentication credentials being automatically included by the browser, such as session cookies.
+
+```text
+Victim logs in
+      ↓
+Browser stores authentication cookie
+      ↓
+Victim visits malicious page
+      ↓
+Malicious page submits forged request
+      ↓
+Browser automatically includes authentication cookie
+      ↓
+Server sees authenticated request
+      ↓
+Unauthorized action is performed
+```
+
+### Vulnerable Endpoint
+
+The intentionally vulnerable endpoint was:
+
+```http
+POST /api/csrf/change-email
+```
+
+The endpoint accepted the state-changing request when the authentication cookie was present but initially had no CSRF protection.
+
+### Exploitation
+
+A malicious HTML page was created to submit a cross-origin form:
+
+```html
+<form action="http://localhost:5066/api/csrf/change-email" method="POST">
+    <input type="hidden" name="email" value="attacker@example.com">
+    <button type="submit">Change Email</button>
+</form>
+```
+
+The authenticated browser submitted the request and the application returned:
+
+```json
+{
+  "message": "Email changed to attacker@example.com"
+}
+```
+
+This demonstrated successful CSRF exploitation.
+
+### Impact
+
+The attacker did not need to know the victim's password or session cookie.
+
+The browser automatically supplied the authentication cookie, allowing the malicious page to trigger an authenticated state-changing request.
+
+The impact depends on what state-changing functionality is exposed. In a real application, CSRF could potentially be used to:
+
+- Change account information
+- Change an email address
+- Change account settings
+- Perform transactions
+- Modify security settings
+- Trigger other authenticated actions
+
+### Remediation
+
+ASP.NET Core Anti-Forgery protection was introduced using `IAntiforgery`.
+
+The protected endpoint validates the request using:
+
+- Authentication cookie
+- Anti-forgery cookie
+- Valid anti-forgery request token
+
+The request token is returned by the legitimate login flow and must be supplied by the legitimate client when performing the protected state-changing request.
+
+The security model becomes:
+
+```text
+Authentication Cookie
+        +
+Valid CSRF Token
+        ↓
+Request Accepted
+```
+
+A forged request containing only the authentication cookie is rejected.
+
+### Retest
+
+The original malicious request was replayed after Anti-Forgery validation was enabled.
+
+Without the required anti-forgery cookie/token, the request was rejected with an `AntiforgeryValidationException`.
+
+A legitimate request containing both the required anti-forgery cookie and valid request token was then submitted through Burp Repeater.
+
+The legitimate request returned:
+
+```http
+HTTP/1.1 200 OK
+```
+
+with:
+
+```json
+{
+  "message": "Email changed to legitimate@example.com"
+}
+```
+
+This demonstrated successful remediation and retesting:
+
+```text
+CSRF Vulnerability
+       ↓
+Successful Exploitation
+       ↓
+Anti-Forgery Protection
+       ↓
+Retest Malicious Request
+       ↓
+Request Rejected
+       ↓
+Retest Legitimate Request
+       ↓
+Request Accepted
+```
+
+### CSRF vs JWT Authentication
+
+The project also demonstrates the difference between cookie-based authentication and JWT authentication.
+
+With a traditional cookie-based session:
+
+```text
+Browser
+   ↓
+Automatically sends Cookie
+   ↓
+Authenticated Request
+```
+
+With the application's JWT flow:
+
+```text
+Client
+   ↓
+Explicitly adds:
+Authorization: Bearer <JWT>
+   ↓
+Authenticated Request
+```
+
+A malicious website cannot normally cause the victim's browser to automatically attach an unknown JWT as an `Authorization` header.
+
+Therefore, traditional CSRF is generally not applicable to the application's JWT Bearer authentication flow.
+
+---
+
 ## Frontend
 
 A lightweight JavaScript frontend is included to simulate interaction with the API through a browser.
@@ -629,6 +803,7 @@ The frontend is used for:
 - Browser DevTools testing
 - Burp Suite interception
 - XSS testing
+- CSRF demonstration
 
 ---
 
@@ -704,7 +879,8 @@ vulnerable-api/
 │
 ├── Controllers/
 │   ├── AuthController.cs
-│   └── UsersController.cs
+│   ├── UsersController.cs
+│   └── CsrfController.cs
 │
 ├── Data/
 │   └── AppDbContext.cs
@@ -719,6 +895,7 @@ vulnerable-api/
 │
 ├── frontend/
 │   ├── index.html
+│   ├── csrf.html
 │   ├── style.css
 │   └── app.js
 │
@@ -771,6 +948,7 @@ Current security testing coverage includes:
 - Missing Rate Limiting
 - JWT Security Testing
 - Hardcoded JWT Secret
+- CSRF
 
 The lab will continue to evolve with additional vulnerabilities, remediation scenarios, retesting, and security assessment documentation.
 

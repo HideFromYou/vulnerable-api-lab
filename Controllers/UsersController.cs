@@ -93,13 +93,11 @@ public class UsersController : ControllerBase
     [HttpGet("search")]
     public IActionResult Search(string username)
     {
-        var sql = "SELECT * FROM Users WHERE Username = @username";
+        var sql = $"SELECT * FROM Users WHERE Username = '{username}'";
 
-        var users = _db.Users
-            .FromSqlRaw(
-                sql,
-                new Microsoft.Data.Sqlite.SqliteParameter("@username", username))
-            .ToList();
+var users = _db.Users
+    .FromSqlRaw(sql)
+    .ToList();
 
         return Ok(users);
     }
