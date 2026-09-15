@@ -1,4 +1,4 @@
-# Vulnerable API Lab
+**# Vulnerable API Lab**
 
 Intentionally vulnerable full-stack user management API built for penetration testing, exploitation, remediation, and security testing practice.
 
@@ -10,9 +10,9 @@ The goal is to follow a realistic penetration testing workflow rather than simpl
 Build → Identify → Hypothesize → Test → Exploit → Assess Impact → Remediate → Retest
 ```
 
----
+**---**
 
-## Overview
+**## Overview**
 
 The application consists of:
 
@@ -28,9 +28,9 @@ The application consists of:
 
 The project is designed as a practical penetration testing laboratory where vulnerabilities are intentionally introduced, manually tested, exploited, remediated, and retested.
 
----
+**---**
 
-## Architecture
+**## Architecture**
 
 ```text
 Browser
@@ -49,12 +49,12 @@ ASP.NET Core Web API
    └── Entity Framework Core
            │
            ▼
-         SQLite
+          SQLite
 ```
 
----
+**---**
 
-## Security Testing
+**## Security Testing**
 
 Security testing is performed manually using:
 
@@ -89,9 +89,9 @@ Remediate
 Retest
 ```
 
----
+**---**
 
-## Confirmed Security Findings
+**## Confirmed Security Findings**
 
 | Finding | Status | Impact |
 | --- | --- | --- |
@@ -111,12 +111,13 @@ Retest
 | JWT Security Testing | Tested | Token structure, claims, signature validation, and role claims analyzed |
 | Hardcoded JWT Secret | Identified | Sensitive signing key stored directly in application source code |
 | CSRF | Remediated + Retested | Authenticated state-changing request could initially be forged through a malicious page |
+| SSRF | Remediated + Retested | Server-side URL fetching allowed access to an internal application endpoint |
 
 Additional vulnerabilities will be introduced and tested as the security lab develops.
 
----
+**---**
 
-## API Endpoints
+**## API Endpoints**
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
@@ -135,10 +136,11 @@ Additional vulnerabilities will be introduced and tested as the security lab dev
 | POST | `/api/users/upload` | File upload endpoint |
 | POST | `/api/csrf/login` | Cookie-based CSRF demonstration login |
 | POST | `/api/csrf/change-email` | CSRF testing endpoint for state-changing requests |
+| GET | `/api/users/fetch` | Server-side URL fetching endpoint used for SSRF testing |
 
----
+**---**
 
-## Authentication & Authorization
+**## Authentication & Authorization**
 
 The application uses JWT-based authentication.
 
@@ -155,7 +157,7 @@ Testing performed includes:
 - Authorization boundary testing
 - Privilege escalation testing
 
-### Authorization Flow
+**### Authorization Flow**
 
 ```text
 Unauthenticated Request
@@ -167,16 +169,16 @@ Unauthenticated Request
 Authenticated User
         │
         ▼
-   Role Validation
-      /       \
-    user      admin
-     │          │
-    403        200
+    Role Validation
+       /       \
+     user      admin
+      │          │
+     403        200
 ```
 
----
+**---**
 
-## BOLA / IDOR Testing
+**## BOLA / IDOR Testing**
 
 The API was tested for Broken Object Level Authorization by manipulating object identifiers.
 
@@ -196,7 +198,7 @@ GET /api/users/3
 
 The API authenticated the requester but failed to verify whether the requester was authorized to access the requested object.
 
-### Testing Flow
+**### Testing Flow**
 
 ```text
 Authenticated User
@@ -214,9 +216,9 @@ Access Another User's Object
 Unauthorized Access
 ```
 
----
+**---**
 
-## Mass Assignment & Privilege Escalation
+**## Mass Assignment & Privilege Escalation**
 
 The user creation and update endpoints were tested by supplying properties that should not have been controlled by the client.
 
@@ -253,9 +255,9 @@ Administrator-only functionality
 
 This demonstrated how mass assignment can lead to privilege escalation when sensitive authorization properties are accepted directly from the client.
 
----
+**---**
 
-## SQL Injection
+**## SQL Injection**
 
 A vulnerable user search endpoint was introduced for testing:
 
@@ -287,7 +289,7 @@ Schema Enumeration
 Impact Assessment
 ```
 
-### Error-Based SQL Injection
+**### Error-Based SQL Injection**
 
 An initial injection character produced a database error.
 
@@ -302,7 +304,7 @@ The application exposed detailed development information through the response, i
 
 This demonstrated both SQL injection behavior and error information disclosure.
 
-### Boolean-Based SQL Injection
+**### Boolean-Based SQL Injection**
 
 Boolean conditions were used to compare application behavior between true and false SQL conditions.
 
@@ -310,7 +312,7 @@ Boolean conditions were used to compare application behavior between true and fa
 TRUE condition
     ↓
 Expected query behavior
-
+    ↓
 FALSE condition
     ↓
 Different application behavior
@@ -318,7 +320,7 @@ Different application behavior
 
 This allowed SQL injection to be confirmed without relying only on database errors.
 
-### Column Count Enumeration
+**### Column Count Enumeration**
 
 `ORDER BY` testing was used to determine the number of columns returned by the vulnerable query.
 
@@ -326,7 +328,7 @@ The application response changed when an invalid column position was supplied.
 
 This established the number of columns required for subsequent UNION-based testing.
 
-### UNION-Based SQL Injection
+**### UNION-Based SQL Injection**
 
 After determining the column count, UNION-based queries were used to identify which result positions were reflected into the API response.
 
@@ -338,11 +340,11 @@ UNION SELECT 1,2,3,4,5
 
 was used to map database result positions to API response fields.
 
-### Data Extraction
+**### Data Extraction**
 
 After identifying useful result positions, the test was extended to retrieve records from the application's `Users` table.
 
-### Schema Enumeration
+**### Schema Enumeration**
 
 SQLite's `sqlite_master` system table was used to enumerate database metadata.
 
@@ -374,7 +376,7 @@ Extract Relevant Data
 Assess Impact
 ```
 
-### Remediation
+**### Remediation**
 
 The vulnerable string-interpolated query was replaced with a parameterized query using `SqliteParameter`.
 
@@ -396,9 +398,9 @@ Retest with Same Payload
 Injection No Longer Successful
 ```
 
----
+**---**
 
-## Cross-Site Scripting (XSS)
+**## Cross-Site Scripting (XSS)**
 
 Multiple XSS contexts were tested to understand how attacker-controlled input reaches different browser execution contexts.
 
@@ -428,13 +430,13 @@ JavaScript Execution
 
 The stored and DOM-based XSS vulnerabilities were remediated by replacing unsafe HTML rendering with safer DOM APIs such as `textContent`.
 
----
+**---**
 
-## Path Traversal
+**## Path Traversal**
 
 A file retrieval endpoint was tested for directory traversal by manipulating the user-controlled filename parameter.
 
-### Baseline Request
+**### Baseline Request**
 
 ```http
 GET /api/users/file?name=test.txt
@@ -450,7 +452,7 @@ GET /api/users/file?name=../secret.txt
 
 This allowed retrieval of a file located outside the intended upload directory.
 
-### Testing Flow
+**### Testing Flow**
 
 ```text
 Expected File
@@ -464,13 +466,13 @@ Escape Intended Directory
 Access External File
 ```
 
----
+**---**
 
-## Command Injection
+**## Command Injection**
 
 The API contains a ping endpoint that passes user-controlled input to a shell command.
 
-### Baseline Request
+**### Baseline Request**
 
 ```http
 GET /api/users/ping?host=127.0.0.1
@@ -486,7 +488,7 @@ GET /api/users/ping?host=127.0.0.1;whoami
 
 The vulnerability was validated using harmless read-only commands in the local lab environment.
 
-### Testing Flow
+**### Testing Flow**
 
 ```text
 Expected Host Input
@@ -500,9 +502,9 @@ Additional Command
 Command Execution
 ```
 
----
+**---**
 
-## Insecure File Upload
+**## Insecure File Upload**
 
 The file upload endpoint was tested for insufficient file type validation.
 
@@ -512,9 +514,9 @@ The uploaded file was then verified through the application's file retrieval fun
 
 The test demonstrated that accepting files primarily based on their filename extension can introduce security risks.
 
----
+**---**
 
-## Information Disclosure
+**## Information Disclosure**
 
 API responses were tested for excessive exposure of sensitive information.
 
@@ -536,9 +538,9 @@ The upload functionality also returned the server-side filesystem path in its re
 
 This demonstrates the risk of returning internal or sensitive application data directly to clients.
 
----
+**---**
 
-## Missing Rate Limiting
+**## Missing Rate Limiting**
 
 The authentication endpoint was tested with repeated invalid login attempts.
 
@@ -552,7 +554,7 @@ without visible throttling, account lockout, or rate limiting.
 
 This demonstrates a potential brute-force protection weakness.
 
-### Testing Flow
+**### Testing Flow**
 
 ```text
 Failed Login
@@ -566,9 +568,9 @@ Repeated Requests Accepted
 No Visible Throttling
 ```
 
----
+**---**
 
-## JWT Security Testing
+**## JWT Security Testing**
 
 JWT authentication was tested from both an authentication and authorization perspective.
 
@@ -583,7 +585,7 @@ Testing included:
 - Bearer token handling
 - Authorization behavior based on JWT claims
 
-### JWT Structure
+**### JWT Structure**
 
 ```text
 Header.Payload.Signature
@@ -601,7 +603,7 @@ Signature
 JWT
 ```
 
-### JWT Role Claim Testing
+**### JWT Role Claim Testing**
 
 The JWT role claim was manipulated during testing to determine whether changing the Base64URL-encoded payload alone would result in elevated privileges.
 
@@ -609,7 +611,7 @@ The modified token was rejected because the signature no longer matched the modi
 
 This demonstrated the importance of JWT signature validation.
 
-### Hardcoded JWT Secret
+**### Hardcoded JWT Secret**
 
 The project also contains a hardcoded JWT signing secret for laboratory purposes.
 
@@ -617,9 +619,9 @@ This is intentionally insecure and exists to provide a realistic example of why 
 
 The secret is used only for the intentionally vulnerable local laboratory environment and should never be used in production.
 
----
+**---**
 
-## Cross-Site Request Forgery (CSRF)
+**## Cross-Site Request Forgery (CSRF)**
 
 A separate intentionally vulnerable cookie-based authentication flow was introduced to demonstrate classical CSRF.
 
@@ -627,7 +629,7 @@ The main application uses JWT authentication through the `Authorization: Bearer`
 
 A dedicated cookie-based demonstration endpoint was therefore created for controlled testing.
 
-### CSRF Concept
+**### CSRF Concept**
 
 CSRF occurs when an attacker tricks an authenticated user's browser into sending an unwanted state-changing request to a vulnerable application.
 
@@ -649,7 +651,7 @@ Server sees authenticated request
 Unauthorized action is performed
 ```
 
-### Vulnerable Endpoint
+**### Vulnerable Endpoint**
 
 The intentionally vulnerable endpoint was:
 
@@ -659,7 +661,7 @@ POST /api/csrf/change-email
 
 The endpoint accepted the state-changing request when the authentication cookie was present but initially had no CSRF protection.
 
-### Exploitation
+**### Exploitation**
 
 A malicious HTML page was created to submit a cross-origin form:
 
@@ -680,7 +682,7 @@ The authenticated browser submitted the request and the application returned:
 
 This demonstrated successful CSRF exploitation.
 
-### Impact
+**### Impact**
 
 The attacker did not need to know the victim's password or session cookie.
 
@@ -695,7 +697,7 @@ The impact depends on what state-changing functionality is exposed. In a real ap
 - Modify security settings
 - Trigger other authenticated actions
 
-### Remediation
+**### Remediation**
 
 ASP.NET Core Anti-Forgery protection was introduced using `IAntiforgery`.
 
@@ -719,7 +721,7 @@ Request Accepted
 
 A forged request containing only the authentication cookie is rejected.
 
-### Retest
+**### Retest**
 
 The original malicious request was replayed after Anti-Forgery validation was enabled.
 
@@ -759,7 +761,7 @@ Retest Legitimate Request
 Request Accepted
 ```
 
-### CSRF vs JWT Authentication
+**### CSRF vs JWT Authentication**
 
 The project also demonstrates the difference between cookie-based authentication and JWT authentication.
 
@@ -788,9 +790,144 @@ A malicious website cannot normally cause the victim's browser to automatically 
 
 Therefore, traditional CSRF is generally not applicable to the application's JWT Bearer authentication flow.
 
----
+**---**
 
-## Frontend
+**## Server-Side Request Forgery (SSRF)**
+
+A server-side URL fetching endpoint was introduced to demonstrate Server-Side Request Forgery (SSRF).
+
+SSRF occurs when an application makes a server-side request to a URL controlled by the client. If the destination is insufficiently restricted, an attacker may cause the server to access internal or otherwise unintended resources.
+
+**### Vulnerable Endpoint**
+
+The intentionally vulnerable endpoint was:
+
+```http
+GET /api/users/fetch?url=https://example.com
+```
+
+The endpoint accepted a user-controlled URL and used the server's `HttpClient` to make the request.
+
+**### Baseline Request**
+
+A request to an external URL returned the remote content:
+
+```http
+GET /api/users/fetch?url=https://example.com
+```
+
+This confirmed that the application was performing the HTTP request server-side.
+
+**### SSRF Exploitation**
+
+A controlled internal endpoint was created inside the same application:
+
+```http
+GET /api/internal/secret
+```
+
+The vulnerable fetch endpoint was then supplied with the internal URL:
+
+```http
+GET /api/users/fetch?url=http://localhost:5066/api/internal/secret
+```
+
+The server made the request to the internal endpoint and returned its response to the attacker.
+
+The internal service returned:
+
+```json
+{
+  "service": "Internal Admin Service",
+  "secret": "INTERNAL-SECRET-12345"
+}
+```
+
+This demonstrated that attacker-controlled input could cause the application to access an internal resource that was not directly exposed through the intended URL-fetching functionality.
+
+**### Testing Flow**
+
+```text
+Attacker
+   ↓
+Vulnerable URL Parameter
+   ↓
+Application Server
+   ↓
+Internal Resource
+   ↓
+Sensitive Response
+   ↓
+Attacker
+```
+
+**### Impact**
+
+Successful SSRF can potentially allow an attacker to:
+
+- Access internal application endpoints
+- Reach services that are not intended to be externally accessible
+- Retrieve sensitive internal data
+- Interact with trusted internal services from the vulnerable server's network position
+
+In this laboratory, the impact was demonstrated by accessing the controlled internal `/api/internal/secret` endpoint.
+
+**### Remediation**
+
+The vulnerable endpoint was remediated by validating the supplied URL before making the server-side request.
+
+The implementation now:
+
+- Requires a valid absolute URL
+- Allows only the `https` scheme
+- Uses an explicit hostname allowlist
+- Rejects URLs outside the approved destination
+
+The allowlist was intentionally restricted to:
+
+```text
+https://example.com
+```
+
+This prevents the endpoint from accepting arbitrary internal destinations such as the previously exploited localhost URL.
+
+**### Retest**
+
+The original SSRF payload was replayed after remediation:
+
+```http
+GET /api/users/fetch?url=http://localhost:5066/api/internal/secret
+```
+
+The request was rejected with:
+
+```text
+URL not allowed
+```
+
+A request to the allowed destination remained functional.
+
+This demonstrated successful remediation and retesting:
+
+```text
+SSRF Vulnerability
+       ↓
+Successful Exploitation
+       ↓
+URL Validation / Allowlist
+       ↓
+Retest Original Payload
+       ↓
+Request Rejected
+       ↓
+Allowed Destination Retested
+       ↓
+Request Accepted
+```
+
+**---**
+
+**## Frontend**
 
 A lightweight JavaScript frontend is included to simulate interaction with the API through a browser.
 
@@ -805,41 +942,41 @@ The frontend is used for:
 - XSS testing
 - CSRF demonstration
 
----
+**---**
 
-## Tech Stack
+**## Tech Stack**
 
-### Backend
+**### Backend**
 
 - ASP.NET Core
 - C#
 - Entity Framework Core
 - SQLite
 
-### Frontend
+**### Frontend**
 
 - HTML
 - CSS
 - JavaScript
 
-### Security Testing
+**### Security Testing**
 
 - Burp Suite
 - Browser DevTools
 - curl
 - Manual HTTP requests
 
-### Development
+**### Development**
 
 - Visual Studio Code
 - Git
 - GitHub
 
----
+**---**
 
-## Running Locally
+**## Running Locally**
 
-### Start the API
+**### Start the API**
 
 From the project root:
 
@@ -855,7 +992,7 @@ The API runs locally on:
 http://localhost:5066
 ```
 
-### Start the Frontend
+**### Start the Frontend**
 
 From the project root:
 
@@ -870,9 +1007,9 @@ The frontend is then available at:
 http://localhost:5500
 ```
 
----
+**---**
 
-## Project Structure
+**## Project Structure**
 
 ```text
 vulnerable-api/
@@ -880,7 +1017,8 @@ vulnerable-api/
 ├── Controllers/
 │   ├── AuthController.cs
 │   ├── UsersController.cs
-│   └── CsrfController.cs
+│   ├── CsrfController.cs
+│   └── InternalController.cs
 │
 ├── Data/
 │   └── AppDbContext.cs
@@ -904,9 +1042,9 @@ vulnerable-api/
 └── vulnerable-api.csproj
 ```
 
----
+**---**
 
-## Project Status
+**## Project Status**
 
 The application is being developed progressively as a practical penetration testing laboratory.
 
@@ -949,12 +1087,13 @@ Current security testing coverage includes:
 - JWT Security Testing
 - Hardcoded JWT Secret
 - CSRF
+- SSRF
 
 The lab will continue to evolve with additional vulnerabilities, remediation scenarios, retesting, and security assessment documentation.
 
----
+**---**
 
-## Disclaimer
+**## Disclaimer**
 
 This application is intentionally vulnerable and is intended only for educational purposes and authorized security testing in a controlled local environment.
 

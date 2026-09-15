@@ -95,9 +95,9 @@ public class UsersController : ControllerBase
     {
         var sql = $"SELECT * FROM Users WHERE Username = '{username}'";
 
-var users = _db.Users
-    .FromSqlRaw(sql)
-    .ToList();
+        var users = _db.Users
+            .FromSqlRaw(sql)
+            .ToList();
 
         return Ok(users);
     }
@@ -133,41 +133,73 @@ var users = _db.Users
     }
 
     [HttpGet("ping")]
-public IActionResult Ping(string host)
-{
-    var command = $"ping -c 1 {host}";
-    var result = System.Diagnostics.Process.Start(
-        new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = "/bin/sh",
-            Arguments = $"-c \"{command}\"",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false
-        });
-
-    var output = result?.StandardOutput.ReadToEnd();
-
-    return Ok(output);
-}
-[HttpPost("upload")]
-public async Task<IActionResult> Upload(IFormFile file)
-{
-    var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-
-    Directory.CreateDirectory(uploadsPath);
-
-    var filePath = Path.Combine(uploadsPath, file.FileName);
-
-    using var stream = new FileStream(filePath, FileMode.Create);
-
-    await file.CopyToAsync(stream);
-
-    return Ok(new
+    public IActionResult Ping(string host)
     {
-        fileName = file.FileName,
-        path = filePath
-    });
-}
+        var command = $"ping -c 1 {host}";
 
+        var result = System.Diagnostics.Process.Start(
+            new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "/bin/sh",
+                Arguments = $"-c \"{command}\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false
+            });
+
+        var output = result?.StandardOutput.ReadToEnd();
+
+        return Ok(output);
+    }
+
+    [HttpPost("upload")]
+    public async Task<IActionResult> Upload(IFormFile file)
+    {
+        var uploadsPath = Path.Combine(
+            Directory.GetCurrentDirectory(),
+            "uploads"
+        );
+
+        Directory.CreateDirectory(uploadsPath);
+
+        var filePath = Path.Combine(
+            uploadsPath,
+            file.FileName
+        );
+
+        using var stream = new FileStream(
+            filePath,
+            FileMode.Create
+        );
+
+        await file.CopyToAsync(stream);
+
+        return Ok(new
+        {
+            fileName = file.FileName,
+            path = filePath
+        });
+    }
+
+   [HttpGet("fetch")]
+public async Task<IActionResult> Fetch(string url)
+{
+    if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+    {
+        return BadRequest("Invalid URL");
+    }
+
+    if (uri.Scheme != Uri.UriSchemeHttps ||
+        uri.Host != "example.com")
+    {
+        return BadRequest("URL not allowed");
+    }
+
+    using var client = new HttpClient();
+
+    var response = await client.GetAsync(uri);
+    var content = await response.Content.ReadAsStringAsync();
+
+    return Ok(content);
+}
 }
