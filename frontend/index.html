@@ -3,52 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mystery Inc. User Portal</title>
+
+    <title>NovaBank | Secure Banking</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <header>
-        <h1>🔎 Mystery Inc. User Portal</h1>
-        <p>Welcome to the Mystery Inc. investigation system.</p>
-    </header>
+    <!-- =========================
+         LOGIN
+         ========================= -->
 
-    <main>
-        <section id="login-section">
-            <h2>Login</h2>
+    <div class="auth-page">
+
+        <div class="auth-brand">
+            <div class="brand-icon">N</div>
+
+            <div>
+                <h1>NovaBank</h1>
+                <p>Secure Digital Banking</p>
+            </div>
+        </div>
+
+        <div class="auth-card">
+
+            <div class="auth-header">
+                <h2>Welcome back</h2>
+                <p>Sign in to access your secure banking account.</p>
+            </div>
 
             <form id="login-form">
-                <input
-                    type="text"
-                    id="username"
-                    placeholder="Username"
-                    required
-                >
-                <div id="search-result"></div>
-                <input
-                    type="password"
-                    id="password"
-                    placeholder="Password"
-                    required
-                >
 
-                <button type="submit">Login</button>
+                <div class="form-group">
+                    <label for="username">Username</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+
+                    <div class="password-header">
+                        <label for="password">Password</label>
+                        <a href="#" id="forgot-password">
+                            Forgot password?
+                        </a>
+                    </div>
+
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                </div>
+
+                <button type="submit" class="login-button">
+                    Sign In
+                </button>
+
+                <p id="login-message"></p>
+
             </form>
 
-            <p id="login-message"></p>
-        </section>
+            <div class="divider">
+                <span>New to NovaBank?</span>
+            </div>
 
-        <section id="users-section">
-            <h2>User Case Files</h2>
-
-            <button id="load-users">
-                Load Users
+            <button class="secondary-button" id="register-button">
+                Create an account
             </button>
 
-            <div id="users-container"></div>
-        </section>
-    </main>
+        </div>
+
+        <div class="security-notice">
+            <span>🔒</span>
+            <span>Your connection is protected by secure authentication.</span>
+        </div>
+
+        <footer>
+            <p>© 2026 NovaBank. Digital banking portal.</p>
+        </footer>
+
+    </div>
+
+
+    <!-- =========================
+         DASHBOARD
+         ========================= -->
+
+    <div id="dashboard" style="display: none;">
+
+        <header class="dashboard-header">
+
+            <div>
+                <h1>NovaBank</h1>
+                <p>Secure Digital Banking</p>
+            </div>
+
+            <button id="logout-button">
+                Sign Out
+            </button>
+
+        </header>
+
+
+        <main class="dashboard-main">
+
+            <!-- ACCOUNT OVERVIEW -->
+
+            <section class="welcome-section">
+
+                <p class="dashboard-label">
+                    ACCOUNT OVERVIEW
+                </p>
+
+                <h2>Welcome back</h2>
+
+                <p>
+                    Your banking account at a glance.
+                </p>
+
+            </section>
+
+
+            <!-- BALANCE -->
+
+            <section class="account-card">
+
+                <div>
+
+                    <p class="account-label">
+                        AVAILABLE BALANCE
+                    </p>
+
+                    <h2>€12,450.00</h2>
+
+                </div>
+
+                <div>
+
+                    <p class="account-label">
+                        ACCOUNT
+                    </p>
+
+                    <p>•••• 4821</p>
+
+                </div>
+
+            </section>
+
+
+            <!-- DASHBOARD CARDS -->
+
+            <section class="dashboard-grid">
+
+
+                <!-- =========================
+                     MY ACCOUNT
+                     ========================= -->
+
+                <div class="dashboard-panel">
+
+                    <h3>My Account</h3>
+
+                    <p>
+                        View and manage your personal account information.
+                    </p>
+
+                    <button id="profile-button">
+                        View Profile
+                    </button>
+
+                    <div
+                        id="profile-result"
+                        style="display: none;"
+                    ></div>
+
+                </div>
+
+
+                <!-- =========================
+                     TRANSFERS
+                     ========================= -->
+
+                <div class="dashboard-panel">
+
+                    <h3>Transfers</h3>
+
+                    <p>
+                        Send money and manage your transactions.
+                    </p>
+
+                    <button id="transfer-button">
+                        Transfers
+                    </button>
+
+                    <div
+                        id="transfer-result"
+                        style="display: none;"
+                    >
+
+                        <div class="form-group">
+
+                            <label for="recipient-id">
+                                Recipient ID
+                            </label>
+
+                            <input
+                                type="number"
+                                id="recipient-id"
+                                placeholder="Enter recipient ID"
+                                min="1"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="transfer-amount">
+                                Amount
+                            </label>
+
+                            <input
+                                type="number"
+                                id="transfer-amount"
+                                placeholder="0.00"
+                                min="0.01"
+                                step="0.01"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="transfer-description">
+                                Description
+                            </label>
+
+                            <input
+                                type="text"
+                                id="transfer-description"
+                                placeholder="e.g. Rent"
+                            >
+
+                        </div>
+
+
+                        <button id="send-transfer-button">
+                            Send Transfer
+                        </button>
+
+                        <p id="transfer-message"></p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     TRANSACTIONS
+                     ========================= -->
+
+                <div class="dashboard-panel">
+
+                    <h3>Transactions</h3>
+
+                    <p>
+                        Review your recent banking activity.
+                    </p>
+
+                    <button id="transactions-button">
+                        View Transactions
+                    </button>
+
+                    <div
+                        id="transactions-result"
+                        style="display: none;"
+                    ></div>
+
+                </div>
+
+
+                <!-- =========================
+                     SECURITY
+                     ========================= -->
+
+                <div class="dashboard-panel">
+
+                    <h3>Security</h3>
+
+                    <p>
+                        Review your account security and authentication.
+                    </p>
+
+                    <button id="security-button">
+                        Security Center
+                    </button>
+
+                    <div
+                        id="security-result"
+                        style="display: none;"
+                    ></div>
+
+                </div>
+
+
+            </section>
+
+        </main>
+
+    </div>
+
 
     <script src="app.js"></script>
+
 </body>
 </html>
