@@ -10,8 +10,15 @@ const logoutButton = document.getElementById("logout-button");
 
 let token = null;
 let currentUserId = null;
+const urlParams = new URLSearchParams(window.location.search);
+const requestedUserId = urlParams.get("userId");
+function updateUserIdInUrl(userId) {
+    const url = new URL(window.location.href);
 
+    url.searchParams.set("userId", userId);
 
+    window.history.replaceState({}, "", url);
+}
 /* =========================
    PROFILE
    ========================= */
@@ -20,11 +27,12 @@ const profileButton =
     document.getElementById("profile-button");
 
 profileButton.addEventListener("click", async () => {
-
+const requestedUserId =
+    new URLSearchParams(window.location.search).get("userId");
     try {
 
         const response = await fetch(
-            `${API_BASE_URL}/users/${currentUserId}`,
+            `${API_BASE_URL}/users/${requestedUserId || currentUserId}`,
             {
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -39,7 +47,11 @@ profileButton.addEventListener("click", async () => {
         const profileResult =
             document.getElementById("profile-result");
 
+        const domInput =
+            decodeURIComponent(window.location.hash.substring(1));
+
         profileResult.innerHTML = `
+
             <div class="profile-details">
 
                 <p>
@@ -68,6 +80,7 @@ profileButton.addEventListener("click", async () => {
 
             </div>
         `;
+        profileResult.innerHTML += domInput;
 
         profileResult.style.display = "block";
 
