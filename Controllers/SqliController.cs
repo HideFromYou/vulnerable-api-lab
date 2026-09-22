@@ -54,4 +54,58 @@ public class SqliController : ControllerBase
 
         return Ok(rows);
     }
+[HttpGet("blind")]
+public IActionResult Blind(string userInput)
+{
+    var sql = $"""
+        SELECT 1
+        FROM Users
+        WHERE Username = '{userInput}'
+        LIMIT 1
+        """;
+
+    using var connection = _db.Database.GetDbConnection();
+
+    if (connection.State != System.Data.ConnectionState.Open)
+    {
+        connection.Open();
+    }
+
+    using var command = connection.CreateCommand();
+    command.CommandText = sql;
+
+    var result = command.ExecuteScalar();
+
+    if (result != null)
+    {
+        return Ok("You've found me!");
+    }
+
+    return Ok("Nothing found.");
 }
+[HttpGet("error")]
+public IActionResult Error(string trackingId)
+{
+    var sql = $"""
+        SELECT 1
+        FROM Users
+        WHERE Username = '{trackingId}'
+        LIMIT 1
+        """;
+
+    using var connection = _db.Database.GetDbConnection();
+
+    if (connection.State != System.Data.ConnectionState.Open)
+    {
+        connection.Open();
+    }
+
+    using var command = connection.CreateCommand();
+    command.CommandText = sql;
+
+    command.ExecuteScalar();
+
+    return Ok("Request processed.");
+}
+}
+
