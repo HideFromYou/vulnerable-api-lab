@@ -8,23 +8,41 @@ The goal is to follow a realistic penetration testing workflow rather than simpl
 
 ```text
 Build
+
   ↓
+
 Understand Application
+
   ↓
+
 Identify Attack Surface
+
   ↓
+
 Hypothesize
+
   ↓
+
 Test
+
   ↓
+
 Confirm Vulnerability
+
   ↓
+
 Exploit
+
   ↓
+
 Assess Impact
+
   ↓
+
 Remediate
+
   ↓
+
 Retest
 ```
 
@@ -75,29 +93,53 @@ The frontend provides a realistic attack surface for testing:
 
 ```text
 Browser
+
    │
+
    ▼
+
 NovaBank JavaScript Frontend
+
    │
+
    │ HTTP Requests
+
    ▼
+
 ASP.NET Core Web API
+
    │
+
    ├── Authentication / Authorization
+
    │
+
    ├── User Management
+
    │
+
    ├── Transactions
+
    │
+
    ├── File Upload
+
    │
+
    ├── SQL Injection Training
+
    │
+
    ├── Security Testing Endpoints
+
    │
+
    └── Entity Framework Core
+
              │
+
              ▼
+
            SQLite
 ```
 
@@ -111,25 +153,45 @@ The application follows a simple HTTP request flow:
 
 ```text
 Browser
+
    ↓
+
 HTML / CSS / JavaScript
+
    ↓
+
 Fetch API
+
    ↓
+
 HTTP Request
+
    ↓
+
 ASP.NET Core
+
    ↓
+
 Controller
+
    ↓
+
 Application Logic
+
    ↓
+
 Entity Framework Core / Direct SQL
+
    ↓
+
 SQLite
+
    ↓
+
 HTTP Response
+
    ↓
+
 Browser
 ```
 
@@ -137,27 +199,49 @@ Example login flow:
 
 ```text
 User clicks Login
+
        ↓
+
 app.js event handler
+
        ↓
+
 fetch()
+
        ↓
+
 POST /api/auth/login
+
        ↓
+
 AuthController
+
        ↓
+
 AppDbContext
+
        ↓
+
 SQLite
+
        ↓
+
 Credentials validated
+
        ↓
+
 JWT generated
+
        ↓
+
 JSON response
+
        ↓
+
 JavaScript stores token
+
        ↓
+
 Authenticated API requests
 ```
 
@@ -184,27 +268,49 @@ The general methodology is:
 
 ```text
 Understand Application
+
         ↓
+
 Identify Attack Surface
+
         ↓
+
 Identify Input
+
         ↓
+
 Understand Data Flow
+
         ↓
+
 Create Hypothesis
+
         ↓
+
 Establish Baseline
+
         ↓
+
 Test
+
         ↓
+
 Confirm Vulnerability
+
         ↓
+
 Exploit
+
         ↓
+
 Assess Impact
+
         ↓
+
 Remediate
+
         ↓
+
 Retest
 ```
 
@@ -270,6 +376,10 @@ The project focuses on understanding:
 | GET | `/api/users/reflect` | Reflected XSS testing |
 | GET | `/api/users/js` | JavaScript-context XSS testing |
 | GET | `/api/users/file` | File retrieval |
+| GET | `/api/pathtraversal/file` | Basic Path Traversal + URL decode testing |
+| GET | `/api/pathtraversal/file-nonrecursive` | Non-recursive traversal stripping |
+| GET | `/api/pathtraversal/file-startvalidation` | Start-of-path validation testing |
+| GET | `/api/pathtraversal/file-extension` | File-extension validation + null-byte testing |
 | GET | `/api/users/ping` | Command Injection testing |
 | POST | `/api/users/upload` | File upload |
 | GET | `/api/users/fetch` | Server-side URL fetching / SSRF |
@@ -304,13 +414,21 @@ Authentication and authorization are treated as separate concepts:
 
 ```text
 Authentication
+
      ↓
+
 "Who are you?"
+
      ↓
+
 JWT
+
      ↓
+
 Authorization
+
      ↓
+
 "What are you allowed to do?"
 ```
 
@@ -332,13 +450,21 @@ Testing flow:
 
 ```text
 Authenticated User
+
         ↓
+
 Access Own Object
+
         ↓
+
 Change Object ID
+
         ↓
+
 Access Another Object
+
         ↓
+
 Unauthorized Access
 ```
 
@@ -352,7 +478,9 @@ Root cause:
 
 ```text
 Authentication was implemented
+
         +
+
 Object-level authorization was insufficient
 ```
 
@@ -378,11 +506,17 @@ Testing flow:
 
 ```text
 Client-Controlled Property
+
         ↓
+
 Model Binding
+
         ↓
+
 Sensitive Server-Side Property
+
         ↓
+
 Unauthorized State Change
 ```
 
@@ -406,15 +540,25 @@ Testing flow:
 
 ```text
 Normal User
+
      ↓
+
 Manipulate Role
+
      ↓
+
 Role becomes admin
+
      ↓
+
 Fresh Login
+
      ↓
+
 JWT with admin role
+
      ↓
+
 Administrator-only functionality
 ```
 
@@ -460,7 +604,9 @@ The SQL Injection laboratory contains separate endpoints for different SQLi tech
 
 ```text
 /api/sqli/basic
+
 /api/sqli/blind
+
 /api/sqli/error
 ```
 
@@ -472,14 +618,23 @@ The laboratory was designed to reproduce a realistic SQL Injection methodology r
 
 ```text
 SQL Injection
+
 │
+
 ├── In-Band
+
 │   └── UNION-Based / Data Extraction
+
 │
+
 └── Blind
+
     ├── Conditional Response
+
     ├── Conditional Error
+
     ├── Time-Based
+
     └── OAST / Out-of-Band
 ```
 
@@ -509,13 +664,21 @@ Conceptual flow:
 
 ```text
 User Input
+
     ↓
+
 SQL Query Construction
+
     ↓
+
 SQLite
+
     ↓
+
 Query Result
+
     ↓
+
 HTTP Response
 ```
 
@@ -569,10 +732,15 @@ Example:
 
 ```text
 ORDER BY 1 → 200
+
 ORDER BY 2 → 200
+
 ORDER BY 3 → 200
+
 ORDER BY 4 → 200
+
 ORDER BY 5 → 200
+
 ORDER BY 6 → 500
 ```
 
@@ -598,9 +766,13 @@ The key requirement is:
 
 ```text
 Original SELECT
+
       +
+
 Injected SELECT
+
       ↓
+
 Same number of columns
 ```
 
@@ -635,9 +807,13 @@ The SQLi lab exposed application database objects including:
 
 ```text
 Users
+
 Transactions
+
 __EFMigrationsHistory
+
 __EFMigrationsLock
+
 sqlite_sequence
 ```
 
@@ -656,9 +832,13 @@ The identified columns included:
 
 ```text
 Id
+
 Username
+
 Email
+
 Password
+
 Role
 ```
 
@@ -685,19 +865,33 @@ Completed workflow:
 
 ```text
 Detect SQLi
+
     ↓
+
 Determine Column Count
+
     ↓
+
 UNION Testing
+
     ↓
+
 DBMS Fingerprinting
+
     ↓
+
 Table Enumeration
+
     ↓
+
 Column Enumeration
+
     ↓
+
 Data Extraction
+
     ↓
+
 Impact Assessment
 ```
 
@@ -760,13 +954,17 @@ Therefore:
 
 ```text
 TRUE
+
  ↓
+
 "You've found me!"
 ```
 
 ```text
 FALSE
+
  ↓
+
 "Nothing found."
 ```
 
@@ -814,13 +1012,21 @@ Conceptual model:
 
 ```text
 Database Information
+
        ↓
+
 TRUE / FALSE Condition
+
        ↓
+
 Application Logic
+
        ↓
+
 Different Response
+
        ↓
+
 Information Enumeration
 ```
 
@@ -868,17 +1074,25 @@ The logic is:
 
 ```text
 Correct Character
+
       ↓
+
 Condition TRUE
+
       ↓
+
 TRUE Response
 ```
 
 ```text
 Incorrect Character
+
       ↓
+
 Condition FALSE
+
       ↓
+
 FALSE Response
 ```
 
@@ -886,9 +1100,13 @@ The same process is repeated for:
 
 ```text
 Position 1
+
 Position 2
+
 Position 3
+
 ...
+
 Position N
 ```
 
@@ -902,16 +1120,27 @@ Typical character set:
 
 ```text
 a
+
 b
+
 c
+
 d
+
 e
+
 ...
+
 z
+
 0
+
 1
+
 2
+
 ...
+
 9
 ```
 
@@ -929,17 +1158,29 @@ The process is then repeated for each password position.
 
 ```text
 Position 1
+
    ↓
+
 Find Character
+
    ↓
+
 Position 2
+
    ↓
+
 Find Character
+
    ↓
+
 Position 3
+
    ↓
+
 ...
+
    ↓
+
 Full Value
 ```
 
@@ -974,21 +1215,37 @@ The laboratory follows:
 
 ```text
 Confirm SQL Injection
+
         ↓
+
 Understand SQL Context
+
         ↓
+
 Confirm Injected SQL Execution
+
         ↓
+
 Confirm Users Table
+
         ↓
+
 Create Conditional Error Oracle
+
         ↓
+
 Identify Target User
+
         ↓
+
 Determine Password Length
+
         ↓
+
 Extract Characters
+
         ↓
+
 Automate with Burp Intruder
 ```
 
@@ -1081,9 +1338,13 @@ The expression is placed inside a `CASE` condition:
 
 ```sql
 CASE
+
     WHEN condition
+
     THEN abs(-9223372036854775808)
+
     ELSE 1
+
 END
 ```
 
@@ -1091,9 +1352,13 @@ The result is:
 
 ```text
 Condition TRUE
+
       ↓
+
 Integer Overflow
+
       ↓
+
 HTTP 500
 ```
 
@@ -1101,9 +1366,13 @@ and:
 
 ```text
 Condition FALSE
+
       ↓
+
 ELSE 1
+
       ↓
+
 HTTP 200
 ```
 
@@ -1111,6 +1380,7 @@ Therefore the lab provides:
 
 ```text
 500 = TRUE
+
 200 = FALSE
 ```
 
@@ -1166,7 +1436,9 @@ For an existing user:
 
 ```text
 TRUE
+
  ↓
+
 500
 ```
 
@@ -1174,7 +1446,9 @@ For a non-existing user:
 
 ```text
 FALSE
+
  ↓
+
 200
 ```
 
@@ -1226,17 +1500,25 @@ The logic is:
 
 ```text
 Correct character
+
       ↓
+
 Condition TRUE
+
       ↓
+
 500
 ```
 
 ```text
 Incorrect character
+
       ↓
+
 Condition FALSE
+
       ↓
+
 200
 ```
 
@@ -1244,9 +1526,13 @@ The same test can be repeated for:
 
 ```text
 Position 1
+
 Position 2
+
 Position 3
+
 ...
+
 Position 11
 ```
 
@@ -1266,6 +1552,7 @@ Payload set:
 
 ```text
 a-z
+
 0-9
 ```
 
@@ -1273,17 +1560,25 @@ Detection:
 
 ```text
 HTTP 500
+
     ↓
+
 Condition TRUE
+
     ↓
+
 Character matched
 ```
 
 ```text
 HTTP 200
+
     ↓
+
 Condition FALSE
+
     ↓
+
 Character did not match
 ```
 
@@ -1293,21 +1588,37 @@ This creates the complete extraction workflow:
 
 ```text
 Find Length
+
     ↓
+
 Position 1
+
     ↓
+
 a-z / 0-9
+
     ↓
+
 Find Character
+
     ↓
+
 Position 2
+
     ↓
+
 a-z / 0-9
+
     ↓
+
 Find Character
+
     ↓
+
 ...
+
     ↓
+
 Full Value
 ```
 
@@ -1319,23 +1630,41 @@ The SQL Injection exercises are designed around the following questions:
 
 ```text
 Where does my input enter?
+
         ↓
+
 What SQL context is it inside?
+
         ↓
+
 Can I alter the query logic?
+
         ↓
+
 What signal can I observe?
+
         ↓
+
 Can I determine the DBMS?
+
         ↓
+
 Can I determine the column count?
+
         ↓
+
 Can I enumerate tables?
+
         ↓
+
 Can I enumerate columns?
+
         ↓
+
 Can I extract data?
+
         ↓
+
 What is the security impact?
 ```
 
@@ -1343,15 +1672,21 @@ The three primary SQLi techniques practiced are:
 
 ```text
 UNION-Based
+
     ↓
+
 Direct data extraction
 
 Conditional Response
+
     ↓
+
 TRUE / FALSE via application behavior
 
 Conditional Error
+
     ↓
+
 TRUE / FALSE via database errors
 ```
 
@@ -1359,21 +1694,37 @@ The overall SQL Injection workflow is:
 
 ```text
 Detection
+
    ↓
+
 Confirmation
+
    ↓
+
 Context Identification
+
    ↓
+
 DBMS Identification
+
    ↓
+
 Enumeration
+
    ↓
+
 Extraction
+
    ↓
+
 Impact Assessment
+
    ↓
+
 Remediation
+
    ↓
+
 Retesting
 ```
 
@@ -1391,17 +1742,29 @@ Testing flow:
 
 ```text
 Attacker Input
+
       ↓
+
 Database
+
       ↓
+
 API Response
+
       ↓
+
 Frontend
+
       ↓
+
 innerHTML
+
       ↓
+
 Browser HTML Parsing
+
       ↓
+
 JavaScript Execution
 ```
 
@@ -1427,15 +1790,25 @@ Testing flow:
 
 ```text
 Request
+
    ↓
+
 Server
+
    ↓
+
 HTTP Response
+
    ↓
+
 Browser
+
    ↓
+
 HTML Parsing
+
    ↓
+
 Execution
 ```
 
@@ -1462,19 +1835,33 @@ Source-to-sink flow:
 
 ```text
 URL Fragment
+
      ↓
+
 window.location.hash
+
      ↓
+
 decodeURIComponent()
+
      ↓
+
 domInput
+
      ↓
+
 innerHTML
+
      ↓
+
 Browser DOM
+
      ↓
+
 HTML Parsing
+
      ↓
+
 JavaScript Execution
 ```
 
@@ -1496,7 +1883,9 @@ Example response structure:
 
 ```javascript
 <script>
+
 let username = "USER_INPUT";
+
 </script>
 ```
 
@@ -1506,7 +1895,9 @@ Conceptually:
 
 ```javascript
 <script>
+
 let username = "";alert(1);//";
+
 </script>
 ```
 
@@ -1514,11 +1905,17 @@ The exercise demonstrated:
 
 ```text
 JavaScript Context
+
         ↓
+
 Break String
+
         ↓
+
 Inject JavaScript
+
         ↓
+
 Execution
 ```
 
@@ -1540,15 +1937,25 @@ Testing flow:
 
 ```text
 Input
+
   ↓
+
 HTML Response
+
   ↓
+
 HTML Parser
+
   ↓
+
 DOM
+
   ↓
+
 Event Handler
+
   ↓
+
 JavaScript Execution
 ```
 
@@ -1564,12 +1971,15 @@ XSS was analyzed according to both delivery mechanism and execution context.
 
 ```text
 Reflected
+
 Request → Response → Browser
 
 Stored
+
 Request → Database → Response → Browser
 
 DOM
+
 Attacker Input → JavaScript → DOM Sink → Browser
 ```
 
@@ -1579,9 +1989,13 @@ Examples include:
 
 ```text
 HTML Context
+
 Attribute Context
+
 JavaScript Context
+
 URL Context
+
 DOM Context
 ```
 
@@ -1589,15 +2003,25 @@ The core pentesting questions are:
 
 ```text
 Where does attacker-controlled input originate?
+
         ↓
+
 How does it travel?
+
         ↓
+
 Which component processes it?
+
         ↓
+
 What parser interprets it?
+
         ↓
+
 What is the final sink?
+
         ↓
+
 Can the browser execute attacker-controlled code?
 ```
 
@@ -1605,49 +2029,606 @@ Can the browser execute attacker-controlled code?
 
 # 11 — Path Traversal
 
+Path Traversal was expanded into a dedicated local training laboratory in:
+
+```text
+Controllers/PathTraversalController.cs
+```
+
+The laboratory uses a controlled filesystem layout:
+
+```text
+vulnerable-api/
+│
+├── path-lab/
+│   └── inside.txt
+│
+└── lab-secret
+```
+
+The intended filesystem directory is:
+
+```text
+/.../vulnerable-api/path-lab/
+```
+
+The security objective is to determine whether attacker-controlled input can escape this intended directory and access a file outside its boundary.
+
+## Vulnerability Root Cause
+
+The vulnerable file-read flow allows user-controlled input to influence a filesystem path:
+
+```text
+User-Controlled filename
+
+        ↓
+
+Path.Combine(baseDirectory, filename)
+
+        ↓
+
+File.Exists()
+
+        ↓
+
+File.ReadAllText()
+```
+
+The core issue is insufficient path validation and boundary enforcement.
+
+In security terms:
+
+```text
+Path Traversal (CWE-22)
+
+User-controlled input reaches a filesystem path without proper
+
+canonicalization and boundary validation.
+```
+
+The intended boundary is the `path-lab` directory. Traversal sequences such as `..` can cause the resolved filesystem path to move into the parent directory.
+
+**Important distinction:**
+
+```text
+Endpoint
+
+    ↓
+
+The API entry point
+
+    ↓
+
+Vulnerability
+
+    ↓
+
+The insecure filesystem handling behind the endpoint
+
+    ↓
+
+Attack Technique
+
+    ↓
+
+The payload or bypass used to exploit the weakness
+```
+
+---
+
+## Path Traversal — Baseline
+
 Endpoint:
 
 ```http
-GET /api/users/file?name=
+GET /api/pathtraversal/file?filename=
 ```
 
-Baseline:
+Baseline request:
 
 ```http
-GET /api/users/file?name=test.txt
+GET /api/pathtraversal/file?filename=inside.txt
 ```
 
-Relative path traversal was then tested.
+Expected result:
+
+```text
+200 OK
+
+PATH_TRAVERSAL_INSIDE
+```
+
+This confirms normal file retrieval inside the intended directory.
+
+---
+
+## Basic Relative Path Traversal
+
+A relative traversal sequence was used:
+
+```http
+GET /api/pathtraversal/file?filename=../lab-secret.txt
+```
+
+Result:
+
+```text
+200 OK
+
+PATH_TRAVERSAL_SECRET
+```
+
+The request escaped the intended `path-lab` directory and accessed a file in the parent project directory.
+
+Conceptually:
+
+```text
+path-lab/
+
+    ↓ ../
+
+vulnerable-api/
+
+    ↓
+
+lab-secret
+```
+
+The `..` component means "parent directory". The file itself is not moved; the filesystem path resolution moves one directory upward before resolving the remaining filename.
+
+---
+
+## Absolute Path Testing
+
+The application was also tested with a full absolute filesystem path.
 
 Example:
 
 ```http
-GET /api/users/file?name=../secret.txt
+GET /api/pathtraversal/file?filename=/Users/nikos/Development/vulnerable-api/lab-secret.txt
 ```
 
-The request demonstrated file access outside the intended upload directory.
-
-Testing flow:
+Result:
 
 ```text
-Expected Filename
-      ↓
-../
-      ↓
-Parent Directory
-      ↓
-Escape Intended Directory
-      ↓
-Read External File
+200 OK
+
+PATH_TRAVERSAL_SECRET
 ```
 
-The exercise focused on:
+This demonstrated that the endpoint accepted an absolute filesystem path and did not enforce a fixed directory boundary.
 
-- Directory boundaries
-- Canonicalization
-- Traversal depth
-- Controlled filesystem access
-- Path construction
+---
+
+## URL-Encoded Traversal
+
+The traversal sequence was then URL encoded:
+
+```http
+GET /api/pathtraversal/file?filename=%2e%2e%2flab-secret.txt
+```
+
+Result:
+
+```text
+200 OK
+
+PATH_TRAVERSAL_SECRET
+```
+
+This demonstrated that URL encoding did not prevent traversal because the encoded value was decoded before filesystem access.
+
+---
+
+## Double URL Encoding / Superfluous URL Decode
+
+A naive traversal filter was introduced into the endpoint:
+
+```csharp
+if (filename.Contains("../"))
+{
+    return BadRequest("Path traversal detected");
+}
+
+filename = Uri.UnescapeDataString(filename);
+```
+
+The filter checks for `../` before the additional decode.
+
+The double-encoded request was:
+
+```http
+GET /api/pathtraversal/file?filename=%25%32%65%25%32%65%25%32%66lab-secret.txt
+```
+
+The request was successfully used to bypass the filter.
+
+Conceptual processing:
+
+```text
+%252e%252e%252f
+
+        ↓ first URL decoding
+
+%2e%2e%2f
+
+        ↓ naive filter
+
+No "../" detected
+
+        ↓ second decode
+
+../
+
+        ↓
+
+Path.Combine()
+
+        ↓
+
+File.ReadAllText()
+
+        ↓
+
+External file read
+```
+
+Result:
+
+```text
+200 OK
+
+PATH_TRAVERSAL_SECRET
+```
+
+The vulnerability is still Path Traversal. Double URL encoding is the bypass technique.
+
+---
+
+## Non-Recursive Traversal Stripping
+
+A separate endpoint was created:
+
+```http
+GET /api/pathtraversal/file-nonrecursive?filename=
+```
+
+The intentionally weak filter removes `../` only once:
+
+```csharp
+filename = filename.Replace("../", "");
+```
+
+The test payload was:
+
+```http
+GET /api/pathtraversal/file-nonrecursive?filename=....//lab-secret.txt
+```
+
+The string transformation is:
+
+```text
+....//lab-secret.txt
+
+        ↓ remove "../" once
+
+../lab-secret.txt
+
+        ↓
+
+Path.Combine()
+
+        ↓
+
+Parent directory traversal
+```
+
+Result:
+
+```text
+200 OK
+
+PATH_TRAVERSAL_SECRET
+```
+
+This demonstrated why non-recursive string replacement is not a reliable security boundary.
+
+---
+
+## Start-of-Path Validation Bypass
+
+A separate endpoint was created:
+
+```http
+GET /api/pathtraversal/file-startvalidation?filename=
+```
+
+The application checks:
+
+```csharp
+if (!filename.StartsWith(baseDirectory))
+{
+    return BadRequest("Invalid path");
+}
+```
+
+The validation therefore checks only the beginning of the string.
+
+Test request:
+
+```http
+GET /api/pathtraversal/file-startvalidation?filename=/Users/nikos/Development/vulnerable-api/path-lab/../lab-secret.txt
+```
+
+The input begins with the intended directory, so the string check succeeds.
+
+The filesystem then resolves:
+
+```text
+path-lab/../
+
+        ↓
+
+vulnerable-api/
+```
+
+Result:
+
+```text
+200 OK
+
+PATH_TRAVERSAL_SECRET
+```
+
+The security weakness is that the application validates the textual prefix rather than the final resolved path.
+
+---
+
+## File Extension Validation + Null Byte
+
+The final laboratory scenario introduces a naive file-extension check.
+
+Endpoint:
+
+```http
+GET /api/pathtraversal/file-extension?filename=
+```
+
+The application requires:
+
+```csharp
+if (!filename.EndsWith(".txt"))
+{
+    return BadRequest("Only .txt files are allowed");
+}
+```
+
+### Baseline
+
+```http
+GET /api/pathtraversal/file-extension?filename=inside.txt
+```
+
+Result:
+
+```text
+200 OK
+
+PATH_TRAVERSAL_INSIDE
+```
+
+### Simple Traversal Blocked
+
+The target file `lab-secret` does not have a `.txt` extension.
+
+Request:
+
+```http
+GET /api/pathtraversal/file-extension?filename=../lab-secret
+```
+
+Result:
+
+```text
+400 Bad Request
+
+Only .txt files are allowed
+```
+
+### Null Byte Bypass
+
+For the controlled laboratory, legacy null-byte truncation was intentionally simulated:
+
+```csharp
+var nullIndex = filename.IndexOf('\0');
+
+if (nullIndex >= 0)
+{
+    filename = filename.Substring(0, nullIndex);
+}
+```
+
+The bypass request was:
+
+```http
+GET /api/pathtraversal/file-extension?filename=../lab-secret%00.txt
+```
+
+Processing:
+
+```text
+../lab-secret%00.txt
+
+        ↓ URL decoding
+
+../lab-secret\0.txt
+
+        ↓ extension validation
+
+EndsWith(".txt") = TRUE
+
+        ↓ simulated truncation
+
+../lab-secret
+
+        ↓
+
+File.ReadAllText()
+
+        ↓
+
+lab-secret
+```
+
+Result:
+
+```text
+200 OK
+
+PATH_TRAVERSAL_NULL_BYTE_SECRET
+```
+
+This scenario demonstrates the historical null-byte bypass pattern while explicitly simulating the legacy truncation behavior in the local lab.
+
+---
+
+## Path Traversal Testing Methodology
+
+The laboratory follows a structured workflow:
+
+```text
+Identify File-Handling Parameter
+
+        ↓
+
+Establish Baseline
+
+        ↓
+
+Test ../
+
+        ↓
+
+Test Absolute Path
+
+        ↓
+
+Test URL Encoding
+
+        ↓
+
+Test Double URL Encoding
+
+        ↓
+
+Test Alternate Traversal Construction
+
+        ↓
+
+Test Validation Bypass
+
+        ↓
+
+Test Extension Validation
+
+        ↓
+
+Test Null Byte Handling
+
+        ↓
+
+Confirm External File Access
+
+        ↓
+
+Assess Impact
+
+        ↓
+
+Remediate
+
+        ↓
+
+Retest
+```
+
+Core pentesting questions:
+
+```text
+Where does attacker-controlled input enter?
+
+        ↓
+
+Which component processes it?
+
+        ↓
+
+Is the input normalized or decoded?
+
+        ↓
+
+Is a filesystem API reached?
+
+        ↓
+
+What is the intended directory boundary?
+
+        ↓
+
+Can the final path escape that boundary?
+
+        ↓
+
+Can a validation control be bypassed?
+
+        ↓
+
+What file can be accessed?
+```
+
+---
+
+## Path Traversal Security Model
+
+The central security distinction is:
+
+```text
+User Input
+
+    ↓
+
+Filesystem Path Construction
+
+    ↓
+
+Canonical / Resolved Path
+
+    ↓
+
+Boundary Validation
+
+    ↓
+
+File Access
+```
+
+A secure implementation should validate the final resolved path rather than rely only on string prefixes, naive replacements, or extension checks.
+
+The preferred security objective is:
+
+```text
+Resolved Path
+
+     ↓
+
+Must remain inside
+
+     ↓
+
+Expected Base Directory
+```
+
+The laboratory intentionally keeps the vulnerable endpoints available so that the same attack techniques can be repeatedly tested.
 
 ---
 
@@ -1693,13 +2674,21 @@ Testing flow:
 
 ```text
 User Input
+
     ↓
+
 Shell Parser
+
     ↓
+
 Shell Operator
+
     ↓
+
 Additional Command
+
     ↓
+
 Command Execution
 ```
 
@@ -1733,8 +2722,11 @@ Important lesson:
 
 ```text
 Successful file upload
+
 does not require
+
 server-side execution
+
 to represent a security concern.
 ```
 
@@ -1776,13 +2768,21 @@ The vulnerable execution flow is:
 
 ```text
 User-Controlled Path
+
         ↓
+
 File.ReadAllTextAsync(path)
+
         ↓
+
 Read C# Source
+
         ↓
+
 CSharpScript.EvaluateAsync()
+
         ↓
+
 Server-Side Code Execution
 ```
 
@@ -1804,13 +2804,21 @@ The attack-chain concept is:
 
 ```text
 Insecure File Upload
+
         ↓
+
 File Stored on Server
+
         ↓
+
 Executable Content
+
         ↓
+
 Execution Endpoint
+
         ↓
+
 Server-Side Code Execution
 ```
 
@@ -1839,13 +2847,21 @@ Testing flow:
 
 ```text
 Failed Login
+
      ↓
+
 Failed Login
+
      ↓
+
 Failed Login
+
      ↓
+
 Repeated Requests Accepted
+
      ↓
+
 No Visible Throttling
 ```
 
@@ -1895,11 +2911,17 @@ Conceptually:
 
 ```text
 Application Source
+
       ↓
+
 Hardcoded Secret
+
       ↓
+
 Secret Exposure
+
       ↓
+
 Potential Token Integrity Risk
 ```
 
@@ -1921,17 +2943,29 @@ Vulnerable flow:
 
 ```text
 Victim logs in
+
       ↓
+
 Browser stores authentication cookie
+
       ↓
+
 Victim visits malicious page
+
       ↓
+
 Malicious page submits forged request
+
       ↓
+
 Browser automatically sends cookie
+
       ↓
+
 Server sees authenticated request
+
       ↓
+
 State-changing action occurs
 ```
 
@@ -1947,9 +2981,13 @@ The protected model requires:
 
 ```text
 Authentication Cookie
+
         +
+
 Valid CSRF Token
+
         ↓
+
 Request Accepted
 ```
 
@@ -2018,15 +3056,25 @@ Testing flow:
 
 ```text
 Attacker
+
    ↓
+
 User-Controlled URL
+
    ↓
+
 Application Server
+
    ↓
+
 Internal Resource
+
    ↓
+
 Sensitive Response
+
    ↓
+
 Attacker
 ```
 
@@ -2077,19 +3125,33 @@ For penetration testing, client-side JavaScript can reveal:
 
 ```text
 Endpoints
+
    ↓
+
 HTTP Methods
+
    ↓
+
 Parameters
+
    ↓
+
 Request Headers
+
    ↓
+
 Authentication
+
    ↓
+
 Client-Side Logic
+
    ↓
+
 DOM Sources
+
    ↓
+
 DOM Sinks
 ```
 
@@ -2140,11 +3202,17 @@ The key pentesting question is:
 
 ```text
 Where does attacker-controlled data come from?
+
         ↓
+
 How is it processed?
+
         ↓
+
 Where does it end?
+
         ↓
+
 What parser interprets it?
 ```
 
@@ -2168,6 +3236,7 @@ Main endpoints:
 
 ```http
 GET /api/transactions
+
 POST /api/transactions
 ```
 
@@ -2211,17 +3280,29 @@ Upload flow:
 
 ```text
 NovaBank Dashboard
+
        ↓
+
 Security Center
+
        ↓
+
 Uploaded Documents
+
        ↓
+
 Upload Document
+
        ↓
+
 File Input
+
        ↓
+
 POST /api/users/upload
+
        ↓
+
 Server Filesystem
 ```
 
@@ -2233,42 +3314,70 @@ This provides a realistic browser-based entry point for upload security testing.
 
 ```text
 vulnerable-api/
+
 │
+
 ├── Controllers/
+
 │   ├── AuthController.cs
 │   ├── UsersController.cs
 │   ├── SqliController.cs
+│   ├── PathTraversalController.cs
 │   ├── TransactionsController.cs
 │   ├── CsrfController.cs
 │   ├── InternalController.cs
 │   └── ExecutionController.cs
+
 │
+
 ├── Data/
+
 │   └── AppDbContext.cs
+
 │
+
 ├── Models/
+
 │   ├── User.cs
 │   ├── LoginRequest.cs
 │   ├── RegisterRequest.cs
 │   ├── CreateUserRequest.cs
 │   ├── Transaction.cs
 │   └── CreateTransactionRequest.cs
+
 │
+
 ├── Migrations/
+
 │   ├── InitialCreate
 │   ├── addUserRole
 │   ├── AddUserPassword
 │   ├── AddTransactions
 │   └── AppDbContextModelSnapshot.cs
+
 │
+
 ├── frontend/
+
 │   ├── index.html
 │   ├── csrf.html
 │   ├── style.css
 │   └── app.js
+
 │
+
 ├── uploads/
+
+├── path-lab/
+
+│   └── inside.txt
+
 │
+
+├── lab-secret
+
+│
+
 ├── Program.cs
 ├── README.md
 ├── appsettings.json
@@ -2306,11 +3415,19 @@ Main controllers:
 
 ```text
 AuthController
+
 UsersController
+
 SqliController
+
+PathTraversalController
+
 TransactionsController
+
 CsrfController
+
 InternalController
+
 ExecutionController
 ```
 
@@ -2326,11 +3443,17 @@ Conceptually:
 
 ```text
 C# Application
+
       ↓
+
 Entity Framework Core
+
       ↓
+
 SQL
+
       ↓
+
 SQLite
 ```
 
@@ -2425,29 +3548,53 @@ Each feature is developed and then tested from a security perspective.
 
 ```text
 Application Feature
+
        ↓
+
 Understand Functionality
+
        ↓
+
 Identify Attack Surface
+
        ↓
+
 Identify Inputs
+
        ↓
+
 Trace Data Flow
+
        ↓
+
 Create Hypothesis
+
        ↓
+
 Establish Baseline
+
        ↓
+
 Manual Testing
+
        ↓
+
 Confirm Vulnerability
+
        ↓
+
 Controlled Exploitation
+
        ↓
+
 Impact Assessment
+
        ↓
+
 Remediation
+
        ↓
+
 Retesting
 ```
 
@@ -2464,21 +3611,37 @@ The project emphasizes the following questions:
 
 ```text
 Where is the input?
+
         ↓
+
 Who controls it?
+
         ↓
+
 Where does it go?
+
         ↓
+
 Which component processes it?
+
         ↓
+
 What parser interprets it?
+
         ↓
+
 What is the final sink?
+
         ↓
+
 Can I access something I should not?
+
         ↓
+
 Can I modify something I should not?
+
         ↓
+
 Can I execute something I should not?
 ```
 
@@ -2486,13 +3649,21 @@ The core security-testing model is:
 
 ```text
 Input
+
   ↓
+
 Context
+
   ↓
+
 Parser
+
   ↓
+
 Sink
+
   ↓
+
 Security Impact
 ```
 
@@ -2516,29 +3687,49 @@ Current application functionality includes:
 - SSRF demonstration flow
 - Controlled server-side execution testing
 - Dedicated SQL Injection training laboratory
+- Dedicated Path Traversal training laboratory
 
 Current security coverage:
 
 ```text
 ✅ BOLA / IDOR
+
 ✅ Mass Assignment
+
 ✅ Privilege Escalation
+
 ✅ Information Disclosure
+
 ✅ SQL Injection
+
 ✅ Stored XSS
+
 ✅ Reflected XSS
+
 ✅ DOM XSS
+
 ✅ JavaScript-context XSS
+
 ✅ HTML-context XSS
+
 ✅ Path Traversal
+
 ✅ Command Injection
+
 ✅ Insecure File Upload
+
 ✅ Upload Filename Path Traversal
+
 ✅ Server-Side Code Execution
+
 ✅ Missing Rate Limiting
+
 ✅ JWT Security Testing
+
 ✅ Hardcoded JWT Secret
+
 ✅ CSRF
+
 ✅ SSRF
 ```
 
@@ -2550,29 +3741,49 @@ The dedicated SQL Injection laboratory currently contains:
 
 ```text
 ✅ In-Band SQL Injection
+
 ✅ Boolean SQL Injection Testing
+
 ✅ Column Count Enumeration
+
 ✅ UNION-Based SQL Injection
+
 ✅ SQLite DBMS Fingerprinting
+
 ✅ SQLite Table Enumeration
+
 ✅ SQLite Column Enumeration
+
 ✅ Data Extraction
 
 ✅ Conditional Response Blind SQLi
+
 ✅ TRUE / FALSE Response Oracle
+
 ✅ EXISTS Enumeration
+
 ✅ Password Length Enumeration
+
 ✅ Character Extraction Methodology
+
 ✅ Burp Intruder Enumeration Workflow
 
 ✅ Conditional Error SQLi
+
 ✅ SQL Context Identification
+
 ✅ Injected SQL Execution Confirmation
+
 ✅ Users Table Confirmation
+
 ✅ TRUE / FALSE Error Oracle
+
 ✅ Target User Identification
+
 ✅ Password Length Enumeration
+
 ✅ Character Extraction Methodology
+
 ✅ Burp Intruder Extraction Workflow
 ```
 
@@ -2580,15 +3791,25 @@ The Error-Based character extraction workflow follows the same fundamental enume
 
 ```text
 Select Character Position
+
         ↓
+
 Test Candidate Characters
+
         ↓
+
 Observe TRUE / FALSE Signal
+
         ↓
+
 Identify Correct Character
+
         ↓
+
 Move to Next Position
+
         ↓
+
 Repeat
 ```
 
@@ -2602,19 +3823,33 @@ The tester should be able to explain:
 
 ```text
 Where does my input enter?
+
         ↓
+
 What is the SQL context?
+
         ↓
+
 How is the query constructed?
+
         ↓
+
 What DBMS is being used?
+
         ↓
+
 What signal do I have?
+
         ↓
+
 How can I enumerate information?
+
         ↓
+
 How can I extract data?
+
         ↓
+
 What is the impact?
 ```
 
@@ -2622,17 +3857,29 @@ The project therefore separates:
 
 ```text
 Detection
+
     ↓
+
 Confirmation
+
     ↓
+
 Enumeration
+
     ↓
+
 Extraction
+
     ↓
+
 Impact
+
     ↓
+
 Remediation
+
     ↓
+
 Retesting
 ```
 
@@ -2696,19 +3943,33 @@ The laboratory is also designed to develop the ability to explain:
 
 ```text
 What the application does
+
         ↓
+
 Where attacker-controlled input enters
+
         ↓
+
 How the input is processed
+
         ↓
+
 Why the vulnerability exists
+
         ↓
+
 How the vulnerability can be exploited
+
         ↓
+
 What the impact is
+
         ↓
+
 How to remediate it
+
         ↓
+
 How to retest the fix
 ```
 
@@ -2722,8 +3983,11 @@ Typical workflow:
 
 ```bash
 git status
+
 git add .
-git commit -m "Update SQL injection training lab"
+
+git commit -m "Update Path Traversal training lab"
+
 git push origin main
 ```
 
