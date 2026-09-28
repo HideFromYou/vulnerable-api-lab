@@ -68,6 +68,8 @@ The frontend provides a realistic attack surface for testing:
 - Transaction functionality
 - Browser DevTools
 - Burp Suite interception
+-Clickjacking
+-Path/Directory Traversal
 
 ---
 
