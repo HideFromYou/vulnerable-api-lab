@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NovaBank - Card Details</title>
+</head>
+<body>
+
+    <h1>NovaBank</h1>
+
+    <h2>Credit Card</h2>
+
+    <button id="openCard">
+        View Card Details
+    </button>
+
+    <p id="status"></p>
+
+    <div id="revealSection" style="display: none;">
+
+        <h3>Card Details</h3>
+
+        <button id="revealCard">
+            Reveal Card
+        </button>
+
+        <div id="cardDetails"></div>
+
+    </div>
+
+    <script>
+
+        const API = "http://localhost:5066";
+
+        document.getElementById("openCard").addEventListener(
+            "click",
+            async () => {
+
+                const response = await fetch(
+                    `${API}/api/clickjacking/card/open`,
+                    {
+                        method: "POST",
+                        credentials: "include"
+                    }
+                );
+
+                if (!response.ok) {
+                    document.getElementById("status").textContent =
+                        "Not authenticated";
+                    return;
+                }
+
+                document.getElementById("status").textContent =
+                    "Card details opened";
+
+                document.getElementById("revealSection").style.display =
+                    "block";
+                    window.parent.postMessage(
+                         "card-opened",
+                         "http://localhost:5500"
+      );
+            }
+        );
+
+        document.getElementById("revealCard").addEventListener(
+            "click",
+            async () => {
+
+                const response = await fetch(
+                    `${API}/api/clickjacking/card/reveal`,
+                    {
+                        method: "POST",
+                        credentials: "include"
+                    }
+                );
+
+                const data = await response.json();
+
+                document.getElementById("cardDetails").innerHTML = `
+                    <p>Card Number: ${data.cardNumber}</p>
+                    <p>Expiry: ${data.expiry}</p>
+                    <p>CVV: ${data.cvv}</p>
+                `;
+            }
+        );
+
+    </script>
+
+</body>
+</html>

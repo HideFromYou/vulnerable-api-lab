@@ -8,41 +8,23 @@ The goal is to follow a realistic penetration testing workflow rather than simpl
 
 ```text
 Build
-
   ↓
-
 Understand Application
-
   ↓
-
 Identify Attack Surface
-
   ↓
-
 Hypothesize
-
   ↓
-
 Test
-
   ↓
-
 Confirm Vulnerability
-
   ↓
-
 Exploit
-
   ↓
-
 Assess Impact
-
   ↓
-
 Remediate
-
   ↓
-
 Retest
 ```
 
@@ -93,53 +75,29 @@ The frontend provides a realistic attack surface for testing:
 
 ```text
 Browser
-
    │
-
    ▼
-
 NovaBank JavaScript Frontend
-
    │
-
    │ HTTP Requests
-
    ▼
-
 ASP.NET Core Web API
-
    │
-
    ├── Authentication / Authorization
-
    │
-
    ├── User Management
-
    │
-
    ├── Transactions
-
    │
-
    ├── File Upload
-
    │
-
    ├── SQL Injection Training
-
    │
-
    ├── Security Testing Endpoints
-
    │
-
    └── Entity Framework Core
-
              │
-
              ▼
-
            SQLite
 ```
 
@@ -153,45 +111,25 @@ The application follows a simple HTTP request flow:
 
 ```text
 Browser
-
    ↓
-
 HTML / CSS / JavaScript
-
    ↓
-
 Fetch API
-
    ↓
-
 HTTP Request
-
    ↓
-
 ASP.NET Core
-
    ↓
-
 Controller
-
    ↓
-
 Application Logic
-
    ↓
-
 Entity Framework Core / Direct SQL
-
    ↓
-
 SQLite
-
    ↓
-
 HTTP Response
-
    ↓
-
 Browser
 ```
 
@@ -199,49 +137,27 @@ Example login flow:
 
 ```text
 User clicks Login
-
        ↓
-
 app.js event handler
-
        ↓
-
 fetch()
-
        ↓
-
 POST /api/auth/login
-
        ↓
-
 AuthController
-
        ↓
-
 AppDbContext
-
        ↓
-
 SQLite
-
        ↓
-
 Credentials validated
-
        ↓
-
 JWT generated
-
        ↓
-
 JSON response
-
        ↓
-
 JavaScript stores token
-
        ↓
-
 Authenticated API requests
 ```
 
@@ -268,49 +184,27 @@ The general methodology is:
 
 ```text
 Understand Application
-
         ↓
-
 Identify Attack Surface
-
         ↓
-
 Identify Input
-
         ↓
-
 Understand Data Flow
-
         ↓
-
 Create Hypothesis
-
         ↓
-
 Establish Baseline
-
         ↓
-
 Test
-
         ↓
-
 Confirm Vulnerability
-
         ↓
-
 Exploit
-
         ↓
-
 Assess Impact
-
         ↓
-
 Remediate
-
         ↓
-
 Retest
 ```
 
@@ -356,6 +250,21 @@ The project focuses on understanding:
 | 19 | CSRF | ✅ |
 | 20 | SSRF | ✅ |
 
+# Additional Advanced Browser-Security Training
+
+The project also contains a dedicated browser-security laboratory covering Clickjacking scenarios that are kept separate from the core 20-finding table.
+
+```text
+✅ Basic Clickjacking
+✅ Prefilled-Input Clickjacking
+✅ Transparent / Invisible iframe
+✅ Frame Busting testing
+✅ iframe sandbox testing
+✅ DOM XSS + Clickjacking
+✅ Multistep Clickjacking
+✅ Card-data disclosure simulation using fake laboratory data
+```
+
 ---
 
 # API Endpoints
@@ -388,6 +297,11 @@ The project focuses on understanding:
 | GET | `/api/transactions` | Retrieve transaction history |
 | POST | `/api/transactions` | Create transaction / transfer |
 | POST | `/api/execution/run` | Controlled server-side C# execution |
+| POST | `/api/clickjacking/login` | Clickjacking lab cookie-based login |
+| GET | `/api/clickjacking/csrf` | Retrieve CSRF token for Clickjacking lab |
+| POST | `/api/clickjacking/change-email` | Clickjacking sensitive action |
+| POST | `/api/clickjacking/card/open` | First step of multistep card scenario |
+| POST | `/api/clickjacking/card/reveal` | Second step of multistep card scenario |
 
 ---
 
@@ -414,21 +328,13 @@ Authentication and authorization are treated as separate concepts:
 
 ```text
 Authentication
-
      ↓
-
 "Who are you?"
-
      ↓
-
 JWT
-
      ↓
-
 Authorization
-
      ↓
-
 "What are you allowed to do?"
 ```
 
@@ -450,21 +356,13 @@ Testing flow:
 
 ```text
 Authenticated User
-
         ↓
-
 Access Own Object
-
         ↓
-
 Change Object ID
-
         ↓
-
 Access Another Object
-
         ↓
-
 Unauthorized Access
 ```
 
@@ -478,9 +376,7 @@ Root cause:
 
 ```text
 Authentication was implemented
-
         +
-
 Object-level authorization was insufficient
 ```
 
@@ -506,17 +402,11 @@ Testing flow:
 
 ```text
 Client-Controlled Property
-
         ↓
-
 Model Binding
-
         ↓
-
 Sensitive Server-Side Property
-
         ↓
-
 Unauthorized State Change
 ```
 
@@ -540,25 +430,15 @@ Testing flow:
 
 ```text
 Normal User
-
      ↓
-
 Manipulate Role
-
      ↓
-
 Role becomes admin
-
      ↓
-
 Fresh Login
-
      ↓
-
 JWT with admin role
-
      ↓
-
 Administrator-only functionality
 ```
 
@@ -604,9 +484,7 @@ The SQL Injection laboratory contains separate endpoints for different SQLi tech
 
 ```text
 /api/sqli/basic
-
 /api/sqli/blind
-
 /api/sqli/error
 ```
 
@@ -618,23 +496,14 @@ The laboratory was designed to reproduce a realistic SQL Injection methodology r
 
 ```text
 SQL Injection
-
 │
-
 ├── In-Band
-
 │   └── UNION-Based / Data Extraction
-
 │
-
 └── Blind
-
     ├── Conditional Response
-
     ├── Conditional Error
-
     ├── Time-Based
-
     └── OAST / Out-of-Band
 ```
 
@@ -664,21 +533,13 @@ Conceptual flow:
 
 ```text
 User Input
-
     ↓
-
 SQL Query Construction
-
     ↓
-
 SQLite
-
     ↓
-
 Query Result
-
     ↓
-
 HTTP Response
 ```
 
@@ -732,15 +593,10 @@ Example:
 
 ```text
 ORDER BY 1 → 200
-
 ORDER BY 2 → 200
-
 ORDER BY 3 → 200
-
 ORDER BY 4 → 200
-
 ORDER BY 5 → 200
-
 ORDER BY 6 → 500
 ```
 
@@ -766,13 +622,9 @@ The key requirement is:
 
 ```text
 Original SELECT
-
       +
-
 Injected SELECT
-
       ↓
-
 Same number of columns
 ```
 
@@ -807,13 +659,9 @@ The SQLi lab exposed application database objects including:
 
 ```text
 Users
-
 Transactions
-
 __EFMigrationsHistory
-
 __EFMigrationsLock
-
 sqlite_sequence
 ```
 
@@ -832,13 +680,9 @@ The identified columns included:
 
 ```text
 Id
-
 Username
-
 Email
-
 Password
-
 Role
 ```
 
@@ -865,33 +709,19 @@ Completed workflow:
 
 ```text
 Detect SQLi
-
     ↓
-
 Determine Column Count
-
     ↓
-
 UNION Testing
-
     ↓
-
 DBMS Fingerprinting
-
     ↓
-
 Table Enumeration
-
     ↓
-
 Column Enumeration
-
     ↓
-
 Data Extraction
-
     ↓
-
 Impact Assessment
 ```
 
@@ -954,17 +784,13 @@ Therefore:
 
 ```text
 TRUE
-
  ↓
-
 "You've found me!"
 ```
 
 ```text
 FALSE
-
  ↓
-
 "Nothing found."
 ```
 
@@ -1012,21 +838,13 @@ Conceptual model:
 
 ```text
 Database Information
-
        ↓
-
 TRUE / FALSE Condition
-
        ↓
-
 Application Logic
-
        ↓
-
 Different Response
-
        ↓
-
 Information Enumeration
 ```
 
@@ -1074,25 +892,17 @@ The logic is:
 
 ```text
 Correct Character
-
       ↓
-
 Condition TRUE
-
       ↓
-
 TRUE Response
 ```
 
 ```text
 Incorrect Character
-
       ↓
-
 Condition FALSE
-
       ↓
-
 FALSE Response
 ```
 
@@ -1100,13 +910,9 @@ The same process is repeated for:
 
 ```text
 Position 1
-
 Position 2
-
 Position 3
-
 ...
-
 Position N
 ```
 
@@ -1120,27 +926,16 @@ Typical character set:
 
 ```text
 a
-
 b
-
 c
-
 d
-
 e
-
 ...
-
 z
-
 0
-
 1
-
 2
-
 ...
-
 9
 ```
 
@@ -1158,29 +953,17 @@ The process is then repeated for each password position.
 
 ```text
 Position 1
-
    ↓
-
 Find Character
-
    ↓
-
 Position 2
-
    ↓
-
 Find Character
-
    ↓
-
 Position 3
-
    ↓
-
 ...
-
    ↓
-
 Full Value
 ```
 
@@ -1215,37 +998,21 @@ The laboratory follows:
 
 ```text
 Confirm SQL Injection
-
         ↓
-
 Understand SQL Context
-
         ↓
-
 Confirm Injected SQL Execution
-
         ↓
-
 Confirm Users Table
-
         ↓
-
 Create Conditional Error Oracle
-
         ↓
-
 Identify Target User
-
         ↓
-
 Determine Password Length
-
         ↓
-
 Extract Characters
-
         ↓
-
 Automate with Burp Intruder
 ```
 
@@ -1338,13 +1105,9 @@ The expression is placed inside a `CASE` condition:
 
 ```sql
 CASE
-
     WHEN condition
-
     THEN abs(-9223372036854775808)
-
     ELSE 1
-
 END
 ```
 
@@ -1352,13 +1115,9 @@ The result is:
 
 ```text
 Condition TRUE
-
       ↓
-
 Integer Overflow
-
       ↓
-
 HTTP 500
 ```
 
@@ -1366,13 +1125,9 @@ and:
 
 ```text
 Condition FALSE
-
       ↓
-
 ELSE 1
-
       ↓
-
 HTTP 200
 ```
 
@@ -1380,7 +1135,6 @@ Therefore the lab provides:
 
 ```text
 500 = TRUE
-
 200 = FALSE
 ```
 
@@ -1436,9 +1190,7 @@ For an existing user:
 
 ```text
 TRUE
-
  ↓
-
 500
 ```
 
@@ -1446,9 +1198,7 @@ For a non-existing user:
 
 ```text
 FALSE
-
  ↓
-
 200
 ```
 
@@ -1500,25 +1250,17 @@ The logic is:
 
 ```text
 Correct character
-
       ↓
-
 Condition TRUE
-
       ↓
-
 500
 ```
 
 ```text
 Incorrect character
-
       ↓
-
 Condition FALSE
-
       ↓
-
 200
 ```
 
@@ -1526,13 +1268,9 @@ The same test can be repeated for:
 
 ```text
 Position 1
-
 Position 2
-
 Position 3
-
 ...
-
 Position 11
 ```
 
@@ -1552,7 +1290,6 @@ Payload set:
 
 ```text
 a-z
-
 0-9
 ```
 
@@ -1560,25 +1297,17 @@ Detection:
 
 ```text
 HTTP 500
-
     ↓
-
 Condition TRUE
-
     ↓
-
 Character matched
 ```
 
 ```text
 HTTP 200
-
     ↓
-
 Condition FALSE
-
     ↓
-
 Character did not match
 ```
 
@@ -1588,37 +1317,21 @@ This creates the complete extraction workflow:
 
 ```text
 Find Length
-
     ↓
-
 Position 1
-
     ↓
-
 a-z / 0-9
-
     ↓
-
 Find Character
-
     ↓
-
 Position 2
-
     ↓
-
 a-z / 0-9
-
     ↓
-
 Find Character
-
     ↓
-
 ...
-
     ↓
-
 Full Value
 ```
 
@@ -1630,41 +1343,23 @@ The SQL Injection exercises are designed around the following questions:
 
 ```text
 Where does my input enter?
-
         ↓
-
 What SQL context is it inside?
-
         ↓
-
 Can I alter the query logic?
-
         ↓
-
 What signal can I observe?
-
         ↓
-
 Can I determine the DBMS?
-
         ↓
-
 Can I determine the column count?
-
         ↓
-
 Can I enumerate tables?
-
         ↓
-
 Can I enumerate columns?
-
         ↓
-
 Can I extract data?
-
         ↓
-
 What is the security impact?
 ```
 
@@ -1672,21 +1367,15 @@ The three primary SQLi techniques practiced are:
 
 ```text
 UNION-Based
-
     ↓
-
 Direct data extraction
 
 Conditional Response
-
     ↓
-
 TRUE / FALSE via application behavior
 
 Conditional Error
-
     ↓
-
 TRUE / FALSE via database errors
 ```
 
@@ -1694,37 +1383,21 @@ The overall SQL Injection workflow is:
 
 ```text
 Detection
-
    ↓
-
 Confirmation
-
    ↓
-
 Context Identification
-
    ↓
-
 DBMS Identification
-
    ↓
-
 Enumeration
-
    ↓
-
 Extraction
-
    ↓
-
 Impact Assessment
-
    ↓
-
 Remediation
-
    ↓
-
 Retesting
 ```
 
@@ -1742,29 +1415,17 @@ Testing flow:
 
 ```text
 Attacker Input
-
       ↓
-
 Database
-
       ↓
-
 API Response
-
       ↓
-
 Frontend
-
       ↓
-
 innerHTML
-
       ↓
-
 Browser HTML Parsing
-
       ↓
-
 JavaScript Execution
 ```
 
@@ -1790,25 +1451,15 @@ Testing flow:
 
 ```text
 Request
-
    ↓
-
 Server
-
    ↓
-
 HTTP Response
-
    ↓
-
 Browser
-
    ↓
-
 HTML Parsing
-
    ↓
-
 Execution
 ```
 
@@ -1835,33 +1486,19 @@ Source-to-sink flow:
 
 ```text
 URL Fragment
-
      ↓
-
 window.location.hash
-
      ↓
-
 decodeURIComponent()
-
      ↓
-
 domInput
-
      ↓
-
 innerHTML
-
      ↓
-
 Browser DOM
-
      ↓
-
 HTML Parsing
-
      ↓
-
 JavaScript Execution
 ```
 
@@ -1883,9 +1520,7 @@ Example response structure:
 
 ```javascript
 <script>
-
 let username = "USER_INPUT";
-
 </script>
 ```
 
@@ -1895,9 +1530,7 @@ Conceptually:
 
 ```javascript
 <script>
-
 let username = "";alert(1);//";
-
 </script>
 ```
 
@@ -1905,17 +1538,11 @@ The exercise demonstrated:
 
 ```text
 JavaScript Context
-
         ↓
-
 Break String
-
         ↓
-
 Inject JavaScript
-
         ↓
-
 Execution
 ```
 
@@ -1937,25 +1564,15 @@ Testing flow:
 
 ```text
 Input
-
   ↓
-
 HTML Response
-
   ↓
-
 HTML Parser
-
   ↓
-
 DOM
-
   ↓
-
 Event Handler
-
   ↓
-
 JavaScript Execution
 ```
 
@@ -1989,13 +1606,9 @@ Examples include:
 
 ```text
 HTML Context
-
 Attribute Context
-
 JavaScript Context
-
 URL Context
-
 DOM Context
 ```
 
@@ -2003,25 +1616,15 @@ The core pentesting questions are:
 
 ```text
 Where does attacker-controlled input originate?
-
         ↓
-
 How does it travel?
-
         ↓
-
 Which component processes it?
-
         ↓
-
 What parser interprets it?
-
         ↓
-
 What is the final sink?
-
         ↓
-
 Can the browser execute attacker-controlled code?
 ```
 
@@ -2060,17 +1663,11 @@ The vulnerable file-read flow allows user-controlled input to influence a filesy
 
 ```text
 User-Controlled filename
-
         ↓
-
 Path.Combine(baseDirectory, filename)
-
         ↓
-
 File.Exists()
-
         ↓
-
 File.ReadAllText()
 ```
 
@@ -2082,7 +1679,6 @@ In security terms:
 Path Traversal (CWE-22)
 
 User-controlled input reaches a filesystem path without proper
-
 canonicalization and boundary validation.
 ```
 
@@ -2092,25 +1688,15 @@ The intended boundary is the `path-lab` directory. Traversal sequences such as `
 
 ```text
 Endpoint
-
     ↓
-
 The API entry point
-
     ↓
-
 Vulnerability
-
     ↓
-
 The insecure filesystem handling behind the endpoint
-
     ↓
-
 Attack Technique
-
     ↓
-
 The payload or bypass used to exploit the weakness
 ```
 
@@ -2134,7 +1720,6 @@ Expected result:
 
 ```text
 200 OK
-
 PATH_TRAVERSAL_INSIDE
 ```
 
@@ -2154,7 +1739,6 @@ Result:
 
 ```text
 200 OK
-
 PATH_TRAVERSAL_SECRET
 ```
 
@@ -2164,13 +1748,9 @@ Conceptually:
 
 ```text
 path-lab/
-
     ↓ ../
-
 vulnerable-api/
-
     ↓
-
 lab-secret
 ```
 
@@ -2192,7 +1772,6 @@ Result:
 
 ```text
 200 OK
-
 PATH_TRAVERSAL_SECRET
 ```
 
@@ -2212,7 +1791,6 @@ Result:
 
 ```text
 200 OK
-
 PATH_TRAVERSAL_SECRET
 ```
 
@@ -2247,29 +1825,17 @@ Conceptual processing:
 
 ```text
 %252e%252e%252f
-
         ↓ first URL decoding
-
 %2e%2e%2f
-
         ↓ naive filter
-
 No "../" detected
-
         ↓ second decode
-
 ../
-
         ↓
-
 Path.Combine()
-
         ↓
-
 File.ReadAllText()
-
         ↓
-
 External file read
 ```
 
@@ -2277,7 +1843,6 @@ Result:
 
 ```text
 200 OK
-
 PATH_TRAVERSAL_SECRET
 ```
 
@@ -2309,17 +1874,11 @@ The string transformation is:
 
 ```text
 ....//lab-secret.txt
-
         ↓ remove "../" once
-
 ../lab-secret.txt
-
         ↓
-
 Path.Combine()
-
         ↓
-
 Parent directory traversal
 ```
 
@@ -2327,7 +1886,6 @@ Result:
 
 ```text
 200 OK
-
 PATH_TRAVERSAL_SECRET
 ```
 
@@ -2366,9 +1924,7 @@ The filesystem then resolves:
 
 ```text
 path-lab/../
-
         ↓
-
 vulnerable-api/
 ```
 
@@ -2376,7 +1932,6 @@ Result:
 
 ```text
 200 OK
-
 PATH_TRAVERSAL_SECRET
 ```
 
@@ -2413,7 +1968,6 @@ Result:
 
 ```text
 200 OK
-
 PATH_TRAVERSAL_INSIDE
 ```
 
@@ -2431,7 +1985,6 @@ Result:
 
 ```text
 400 Bad Request
-
 Only .txt files are allowed
 ```
 
@@ -2458,25 +2011,15 @@ Processing:
 
 ```text
 ../lab-secret%00.txt
-
         ↓ URL decoding
-
 ../lab-secret\0.txt
-
         ↓ extension validation
-
 EndsWith(".txt") = TRUE
-
         ↓ simulated truncation
-
 ../lab-secret
-
         ↓
-
 File.ReadAllText()
-
         ↓
-
 lab-secret
 ```
 
@@ -2484,7 +2027,6 @@ Result:
 
 ```text
 200 OK
-
 PATH_TRAVERSAL_NULL_BYTE_SECRET
 ```
 
@@ -2498,57 +2040,31 @@ The laboratory follows a structured workflow:
 
 ```text
 Identify File-Handling Parameter
-
         ↓
-
 Establish Baseline
-
         ↓
-
 Test ../
-
         ↓
-
 Test Absolute Path
-
         ↓
-
 Test URL Encoding
-
         ↓
-
 Test Double URL Encoding
-
         ↓
-
 Test Alternate Traversal Construction
-
         ↓
-
 Test Validation Bypass
-
         ↓
-
 Test Extension Validation
-
         ↓
-
 Test Null Byte Handling
-
         ↓
-
 Confirm External File Access
-
         ↓
-
 Assess Impact
-
         ↓
-
 Remediate
-
         ↓
-
 Retest
 ```
 
@@ -2556,33 +2072,19 @@ Core pentesting questions:
 
 ```text
 Where does attacker-controlled input enter?
-
         ↓
-
 Which component processes it?
-
         ↓
-
 Is the input normalized or decoded?
-
         ↓
-
 Is a filesystem API reached?
-
         ↓
-
 What is the intended directory boundary?
-
         ↓
-
 Can the final path escape that boundary?
-
         ↓
-
 Can a validation control be bypassed?
-
         ↓
-
 What file can be accessed?
 ```
 
@@ -2594,21 +2096,13 @@ The central security distinction is:
 
 ```text
 User Input
-
     ↓
-
 Filesystem Path Construction
-
     ↓
-
 Canonical / Resolved Path
-
     ↓
-
 Boundary Validation
-
     ↓
-
 File Access
 ```
 
@@ -2618,13 +2112,9 @@ The preferred security objective is:
 
 ```text
 Resolved Path
-
      ↓
-
 Must remain inside
-
      ↓
-
 Expected Base Directory
 ```
 
@@ -2660,13 +2150,9 @@ Shell operators practiced included:
 
 ```text
 ;   command separator
-
 &&  execute next command if previous succeeds
-
 ||  execute next command if previous fails
-
 |   pipe output to another command
-
 &   background execution operator
 ```
 
@@ -2674,21 +2160,13 @@ Testing flow:
 
 ```text
 User Input
-
     ↓
-
 Shell Parser
-
     ↓
-
 Shell Operator
-
     ↓
-
 Additional Command
-
     ↓
-
 Command Execution
 ```
 
@@ -2722,11 +2200,8 @@ Important lesson:
 
 ```text
 Successful file upload
-
 does not require
-
 server-side execution
-
 to represent a security concern.
 ```
 
@@ -2768,21 +2243,13 @@ The vulnerable execution flow is:
 
 ```text
 User-Controlled Path
-
         ↓
-
 File.ReadAllTextAsync(path)
-
         ↓
-
 Read C# Source
-
         ↓
-
 CSharpScript.EvaluateAsync()
-
         ↓
-
 Server-Side Code Execution
 ```
 
@@ -2804,21 +2271,13 @@ The attack-chain concept is:
 
 ```text
 Insecure File Upload
-
         ↓
-
 File Stored on Server
-
         ↓
-
 Executable Content
-
         ↓
-
 Execution Endpoint
-
         ↓
-
 Server-Side Code Execution
 ```
 
@@ -2847,21 +2306,13 @@ Testing flow:
 
 ```text
 Failed Login
-
      ↓
-
 Failed Login
-
      ↓
-
 Failed Login
-
      ↓
-
 Repeated Requests Accepted
-
      ↓
-
 No Visible Throttling
 ```
 
@@ -2911,17 +2362,11 @@ Conceptually:
 
 ```text
 Application Source
-
       ↓
-
 Hardcoded Secret
-
       ↓
-
 Secret Exposure
-
       ↓
-
 Potential Token Integrity Risk
 ```
 
@@ -2943,29 +2388,17 @@ Vulnerable flow:
 
 ```text
 Victim logs in
-
       ↓
-
 Browser stores authentication cookie
-
       ↓
-
 Victim visits malicious page
-
       ↓
-
 Malicious page submits forged request
-
       ↓
-
 Browser automatically sends cookie
-
       ↓
-
 Server sees authenticated request
-
       ↓
-
 State-changing action occurs
 ```
 
@@ -2981,13 +2414,9 @@ The protected model requires:
 
 ```text
 Authentication Cookie
-
         +
-
 Valid CSRF Token
-
         ↓
-
 Request Accepted
 ```
 
@@ -3056,31 +2485,799 @@ Testing flow:
 
 ```text
 Attacker
-
    ↓
-
 User-Controlled URL
-
    ↓
-
 Application Server
-
    ↓
-
 Internal Resource
-
    ↓
-
 Sensitive Response
-
    ↓
-
 Attacker
 ```
 
 The vulnerable implementation was subsequently remediated through URL validation and an explicit destination allowlist.
 
 The internal localhost request was rejected after remediation.
+
+---
+
+# Advanced Browser Security Lab
+
+# Clickjacking
+
+A dedicated Clickjacking laboratory was created using:
+
+```text
+Controllers/ClickjackingController.cs
+```
+
+The frontend laboratory pages are:
+
+```text
+frontend/clickjacking-target.html
+frontend/clickjacking-exploit.html
+frontend/clickjacking-card.html
+frontend/clickjacking-card-exploit.html
+```
+
+The laboratory uses cookie-based authentication and ASP.NET Core Anti-Forgery to reproduce browser-session behavior.
+
+The primary sensitive action is:
+
+```http
+POST /api/clickjacking/change-email
+```
+
+The multistep card scenario uses:
+
+```http
+POST /api/clickjacking/card/open
+POST /api/clickjacking/card/reveal
+```
+
+All card data used by the laboratory is fake test data.
+
+---
+
+# Clickjacking Architecture
+
+```text
+Victim Browser
+      ↓
+clickjacking-exploit.html
+      │
+      ├── Visible Decoy
+      │
+      └── Transparent iframe
+              ↓
+        clickjacking-target.html
+              ↓
+        Sensitive Action
+              ↓
+        API Request
+              ↓
+        Application State Change
+```
+
+The core browser-security concept is:
+
+```text
+Attacker-controlled visible UI
+            +
+Transparent framed legitimate UI
+            +
+Victim click
+            ↓
+Legitimate action is triggered
+```
+
+---
+
+# Clickjacking — Frameability Check
+
+The first step was checking whether the actual target page could be framed.
+
+Burp Suite was used to inspect:
+
+```text
+Proxy
+ ↓
+HTTP history
+ ↓
+GET /clickjacking-target.html
+```
+
+The target HTML response did not contain:
+
+```http
+X-Frame-Options
+```
+
+or a Content-Security-Policy containing:
+
+```text
+frame-ancestors
+```
+
+The page therefore loaded successfully inside an iframe in the local laboratory.
+
+The response of the actual resource being framed is the response that must be checked during a real Clickjacking assessment.
+
+---
+
+# Clickjacking — Sensitive Action
+
+The first sensitive action selected for the laboratory was:
+
+```text
+Change Email
+```
+
+Normal flow:
+
+```text
+Login
+   ↓
+Authenticated Session Cookie
+   ↓
+CSRF Token
+   ↓
+Change Email
+   ↓
+Database Update
+```
+
+The dedicated authentication cookie is:
+
+```text
+clickjacking_session
+```
+
+The Change Email endpoint validates the ASP.NET Core Anti-Forgery token before changing the stored email address.
+
+---
+
+# Clickjacking — Basic 1-Click Scenario
+
+The basic exploit consists of:
+
+```text
+clickjacking-exploit.html
+        ↓
+iframe
+        ↓
+clickjacking-target.html
+        ↓
+Change Email
+```
+
+The attacker page contains a visible decoy positioned over the legitimate button inside the iframe.
+
+Example decoy:
+
+```text
+Confirm Account Settings
+```
+
+The legitimate target is:
+
+```text
+Change Email
+```
+
+During alignment the iframe was made partially visible:
+
+```css
+opacity: 0.1;
+```
+
+After alignment the iframe opacity was reduced to:
+
+```css
+opacity: 0.0001;
+```
+
+Successful flow:
+
+```text
+Victim Click
+    ↓
+Real Change Email Button
+    ↓
+POST /api/clickjacking/change-email
+    ↓
+HTTP 200 OK
+    ↓
+Email Changed
+```
+
+---
+
+# Clickjacking — Prefilled Input
+
+The target page accepts an email value through the URL query string:
+
+```text
+?email=hacker@evil.local
+```
+
+The target page reads the parameter using:
+
+```javascript
+const params = new URLSearchParams(window.location.search);
+const prefilledEmail = params.get("email");
+
+if (prefilledEmail) {
+    document.getElementById("email").value = prefilledEmail;
+}
+```
+
+The framed target can therefore be loaded as:
+
+```text
+http://localhost:5500/clickjacking-target.html?email=hacker@evil.local
+```
+
+The exercise demonstrates how attacker-controlled URL parameters can pre-populate a sensitive form field before the final victim interaction.
+
+---
+
+# Clickjacking — CSRF Token Retrieval
+
+The Clickjacking laboratory exposes:
+
+```http
+GET /api/clickjacking/csrf
+```
+
+This endpoint returns a fresh Anti-Forgery request token for an existing authenticated Clickjacking session.
+
+Conceptually:
+
+```text
+Existing Authentication Cookie
+        ↓
+GET /api/clickjacking/csrf
+        ↓
+CSRF Token
+        ↓
+Target Page
+        ↓
+State-Changing Request
+```
+
+The target page uses:
+
+```javascript
+credentials: "include"
+```
+
+so the browser includes the Clickjacking session cookie with the API request.
+
+The laboratory demonstrates that a valid CSRF token and Clickjacking are separate security concerns.
+
+---
+
+# Clickjacking — Invisible Iframe
+
+The iframe was first tested with:
+
+```css
+opacity: 0.1;
+```
+
+After successful alignment it was changed to:
+
+```css
+opacity: 0.0001;
+```
+
+The iframe remained interactive despite being visually transparent.
+
+Flow:
+
+```text
+Visible Decoy
+      ↓
+Victim Click
+      ↓
+Invisible iframe
+      ↓
+Real target button
+      ↓
+Sensitive action
+```
+
+---
+
+# Clickjacking — Decoy Alignment
+
+The exploit page uses CSS positioning and stacking order to align the visible decoy with the legitimate framed control.
+
+Conceptually:
+
+```text
+exploit.html
+│
+├── Visible Decoy
+│
+└── iframe
+      ↓
+      target.html
+            ↓
+      real button
+```
+
+The iframe was positioned above the attacker-controlled decoy so the browser delivered the click to the actual framed element.
+
+---
+
+# Clickjacking — Frame Busting
+
+A client-side frame-busting mechanism was tested in the target page:
+
+```javascript
+if (window.top !== window.self) {
+    window.top.location = window.self.location;
+}
+```
+
+The logic checks whether the page is running inside a frame:
+
+```text
+window.top !== window.self
+        ↓
+Page is framed
+        ↓
+Attempt to navigate top-level window
+```
+
+The mechanism was tested as a client-side Clickjacking defense.
+
+---
+
+# Clickjacking — iframe Sandbox Testing
+
+HTML5 iframe sandbox behavior was also tested.
+
+First configuration:
+
+```html
+<iframe
+    sandbox="allow-forms"
+    src="...">
+</iframe>
+```
+
+This restricted script execution in the framed page and broke the JavaScript-driven application flow used by the lab.
+
+A second configuration was tested:
+
+```html
+<iframe
+    sandbox="allow-scripts allow-same-origin"
+    src="...">
+</iframe>
+```
+
+This allowed the page's scripts to run, but the original frame-busting/navigation behavior still changed the exploitation path and the original Clickjacking flow did not complete.
+
+These were controlled browser-security experiments performed inside the local laboratory. They should not be treated as a universal Clickjacking bypass or defense.
+
+---
+
+# Clickjacking + DOM XSS
+
+The project contains a dedicated DOM XSS source-to-sink flow in:
+
+```text
+frontend/app.js
+```
+
+Source:
+
+```javascript
+const domInput =
+    decodeURIComponent(window.location.hash.substring(1));
+```
+
+Sink:
+
+```javascript
+profileResult.innerHTML += domInput;
+```
+
+The data flow is:
+
+```text
+URL Fragment
+      ↓
+window.location.hash
+      ↓
+decodeURIComponent()
+      ↓
+domInput
+      ↓
+profileResult.innerHTML
+      ↓
+Browser HTML Parsing
+      ↓
+JavaScript Execution
+```
+
+The Clickjacking exploit loads the vulnerable page inside an iframe and aligns a visible decoy with the real `View Profile` button.
+
+Conceptual attack chain:
+
+```text
+clickjacking-exploit.html
+        ↓
+iframe → index.html
+        ↓
+URL Fragment
+        ↓
+DOM XSS Source
+        ↓
+innerHTML Sink
+        ↓
+JavaScript Execution
+```
+
+The laboratory therefore combines two browser-side vulnerabilities into one attack chain.
+
+---
+
+# Multistep Clickjacking
+
+A separate scenario was created to demonstrate a multistep Clickjacking flow:
+
+```text
+Click 1
+   ↓
+Application State Change
+   ↓
+Click 2
+   ↓
+Second Sensitive Action
+```
+
+The target page is:
+
+```text
+frontend/clickjacking-card.html
+```
+
+and the exploit page is:
+
+```text
+frontend/clickjacking-card-exploit.html
+```
+
+---
+
+# Multistep Card Scenario
+
+The laboratory simulates a credit-card disclosure workflow using fake data only.
+
+First state:
+
+```text
+View Card Details
+```
+
+Second state:
+
+```text
+Reveal Card
+```
+
+The backend endpoints are:
+
+```http
+POST /api/clickjacking/card/open
+POST /api/clickjacking/card/reveal
+```
+
+---
+
+# Multistep Card — First Action
+
+The first button triggers:
+
+```http
+POST /api/clickjacking/card/open
+```
+
+The server creates a dedicated card-opened state using a cookie:
+
+```text
+clickjacking_card_opened=true
+```
+
+Conceptual flow:
+
+```text
+Click 1
+   ↓
+View Card Details
+   ↓
+POST /api/clickjacking/card/open
+   ↓
+Card state opened
+```
+
+---
+
+# Multistep Card — State Transition
+
+After the first action succeeds, the target page sends a message to the parent exploit page:
+
+```javascript
+window.parent.postMessage(
+    "card-opened",
+    "http://localhost:5500"
+);
+```
+
+The exploit page listens for the message and verifies the origin:
+
+```javascript
+window.addEventListener("message", (event) => {
+
+    if (event.origin !== "http://localhost:5500") {
+        return;
+    }
+
+    if (event.data === "card-opened") {
+        document.querySelector(".secondClick").style.display =
+            "block";
+    }
+});
+```
+
+Flow:
+
+```text
+First Click
+    ↓
+card/open
+    ↓
+Target state changes
+    ↓
+postMessage()
+    ↓
+Exploit page receives message
+    ↓
+Second Decoy Appears
+```
+
+The scenario demonstrates that a Clickjacking attack does not necessarily have to complete with a single state-changing click.
+
+---
+
+# Multistep Card — Second Action
+
+The second decoy was aligned over:
+
+```text
+Reveal Card
+```
+
+The second click triggered:
+
+```http
+POST /api/clickjacking/card/reveal
+```
+
+Successful result:
+
+```text
+HTTP 200 OK
+```
+
+The endpoint returned fake laboratory card data:
+
+```json
+{
+  "cardNumber": "4111 1111 1111 1111",
+  "expiry": "12/30",
+  "cvv": "123"
+}
+```
+
+Complete attack chain:
+
+```text
+Click 1
+   ↓
+View Card Details
+   ↓
+card/open
+   ↓
+State Change
+   ↓
+Second Decoy
+   ↓
+Click 2
+   ↓
+Reveal Card
+   ↓
+card/reveal
+   ↓
+Fake Card Credentials
+```
+
+The returned card values are simulated training data and do not represent real payment credentials.
+
+---
+
+# Clickjacking Security Model
+
+The laboratory demonstrates the interaction between browser framing, authentication state, CSRF protection, UI positioning, and application state changes.
+
+```text
+Authentication
+      ↓
+Session Cookie
+      ↓
+CSRF Token
+      ↓
+Sensitive Action
+      ↓
+Frameability
+      ↓
+iframe
+      ↓
+Decoy
+      ↓
+Victim Interaction
+```
+
+The important distinction is:
+
+```text
+CSRF
+ ↓
+Can an attacker cause a state-changing authenticated request?
+
+Clickjacking
+ ↓
+Can an attacker visually trick the user into interacting with
+a legitimate framed interface?
+```
+
+A valid CSRF token inside a legitimate page does not by itself determine whether that page can be framed.
+
+---
+
+# Clickjacking Lab Configuration
+
+The browser laboratory uses the frontend origin:
+
+```text
+http://localhost:5500
+```
+
+and the API origin:
+
+```text
+http://localhost:5066
+```
+
+The frontend therefore needs credentialed CORS access to the API for the cookie-based Clickjacking demonstrations.
+
+The CORS configuration includes:
+
+```csharp
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5500")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+```
+
+The application uses:
+
+```javascript
+credentials: "include"
+```
+
+for the relevant frontend API requests.
+
+ASP.NET Core Anti-Forgery can add an `X-Frame-Options` response header. For the Clickjacking demonstration this lab intentionally suppresses that automatic header while retaining the Anti-Forgery functionality:
+
+```csharp
+builder.Services.AddAntiforgery(options =>
+{
+    options.SuppressXFrameOptionsHeader = true;
+});
+```
+
+This configuration is a laboratory setup to permit the browser demonstration. It is not a production remediation.
+
+An important distinction observed during testing was that the earlier `X-Frame-Options: SAMEORIGIN` response came from ASP.NET Core Anti-Forgery behavior after token generation, rather than from the target HTML page itself.
+
+---
+
+# Clickjacking Testing Workflow
+
+```text
+1. Find sensitive action
+        ↓
+2. Identify the actual target page
+        ↓
+3. Check whether it is frameable
+        ↓
+4. Inspect X-Frame-Options / CSP
+        ↓
+5. Check CSRF protection
+        ↓
+6. Establish a legitimate baseline
+        ↓
+7. Create iframe
+        ↓
+8. Add visible decoy
+        ↓
+9. Align decoy with target control
+        ↓
+10. Test with opacity ≈ 0.1
+        ↓
+11. Confirm click reaches target
+        ↓
+12. Reduce opacity to ≈ 0.0001
+        ↓
+13. Test victim interaction
+        ↓
+14. Test browser defenses
+        ↓
+15. Assess impact
+        ↓
+16. Remediate
+        ↓
+17. Retest
+```
+
+For multistep scenarios the workflow becomes:
+
+```text
+Click 1
+   ↓
+Application State Change
+   ↓
+State Notification
+   ↓
+Second Decoy
+   ↓
+Click 2
+   ↓
+Second Sensitive Action
+```
+
+---
+
+# Clickjacking Lessons
+
+The Clickjacking laboratory reinforced the following concepts:
+
+- A sensitive action should be identified before testing framing.
+- The actual response of the resource being framed should be inspected for framing protections.
+- `X-Frame-Options` and CSP `frame-ancestors` are important framing controls.
+- CSRF protection and Clickjacking are different browser-security problems.
+- A valid CSRF token can exist inside a legitimate framed page.
+- iframe opacity can be reduced after alignment to make the framed UI effectively invisible.
+- URL parameters can be used to prefill controlled application inputs.
+- Frame Busting is client-side behavior and must be tested in the actual browser context.
+- iframe sandboxing can change script execution and navigation behavior.
+- DOM XSS can be chained with Clickjacking when a vulnerable client-side sink is reachable inside the frame.
+- Multistep Clickjacking requires tracking application state and synchronizing the next decoy with the next target action.
 
 ---
 
@@ -3100,6 +3297,7 @@ The frontend includes:
 - Document upload
 - Logout
 - JWT-based authentication
+- Clickjacking training pages
 
 The frontend communicates with the API using JavaScript and the Fetch API.
 
@@ -3125,33 +3323,19 @@ For penetration testing, client-side JavaScript can reveal:
 
 ```text
 Endpoints
-
    ↓
-
 HTTP Methods
-
    ↓
-
 Parameters
-
    ↓
-
 Request Headers
-
    ↓
-
 Authentication
-
    ↓
-
 Client-Side Logic
-
    ↓
-
 DOM Sources
-
    ↓
-
 DOM Sinks
 ```
 
@@ -3202,17 +3386,11 @@ The key pentesting question is:
 
 ```text
 Where does attacker-controlled data come from?
-
         ↓
-
 How is it processed?
-
         ↓
-
 Where does it end?
-
         ↓
-
 What parser interprets it?
 ```
 
@@ -3236,7 +3414,6 @@ Main endpoints:
 
 ```http
 GET /api/transactions
-
 POST /api/transactions
 ```
 
@@ -3280,29 +3457,17 @@ Upload flow:
 
 ```text
 NovaBank Dashboard
-
        ↓
-
 Security Center
-
        ↓
-
 Uploaded Documents
-
        ↓
-
 Upload Document
-
        ↓
-
 File Input
-
        ↓
-
 POST /api/users/upload
-
        ↓
-
 Server Filesystem
 ```
 
@@ -3314,11 +3479,8 @@ This provides a realistic browser-based entry point for upload security testing.
 
 ```text
 vulnerable-api/
-
 │
-
 ├── Controllers/
-
 │   ├── AuthController.cs
 │   ├── UsersController.cs
 │   ├── SqliController.cs
@@ -3326,58 +3488,43 @@ vulnerable-api/
 │   ├── TransactionsController.cs
 │   ├── CsrfController.cs
 │   ├── InternalController.cs
-│   └── ExecutionController.cs
-
+│   ├── ExecutionController.cs
+│   └── ClickjackingController.cs
 │
-
 ├── Data/
-
 │   └── AppDbContext.cs
-
 │
-
 ├── Models/
-
 │   ├── User.cs
 │   ├── LoginRequest.cs
 │   ├── RegisterRequest.cs
 │   ├── CreateUserRequest.cs
 │   ├── Transaction.cs
 │   └── CreateTransactionRequest.cs
-
 │
-
 ├── Migrations/
-
 │   ├── InitialCreate
 │   ├── addUserRole
 │   ├── AddUserPassword
 │   ├── AddTransactions
 │   └── AppDbContextModelSnapshot.cs
-
 │
-
 ├── frontend/
-
 │   ├── index.html
 │   ├── csrf.html
 │   ├── style.css
-│   └── app.js
-
+│   ├── app.js
+│   ├── clickjacking-target.html
+│   ├── clickjacking-exploit.html
+│   ├── clickjacking-card.html
+│   └── clickjacking-card-exploit.html
 │
-
 ├── uploads/
-
 ├── path-lab/
-
 │   └── inside.txt
-
 │
-
 ├── lab-secret
-
 │
-
 ├── Program.cs
 ├── README.md
 ├── appsettings.json
@@ -3415,20 +3562,14 @@ Main controllers:
 
 ```text
 AuthController
-
 UsersController
-
 SqliController
-
 PathTraversalController
-
 TransactionsController
-
 CsrfController
-
 InternalController
-
 ExecutionController
+ClickjackingController
 ```
 
 The `SqliController` contains intentionally vulnerable SQL Injection training endpoints.
@@ -3443,17 +3584,11 @@ Conceptually:
 
 ```text
 C# Application
-
       ↓
-
 Entity Framework Core
-
       ↓
-
 SQL
-
       ↓
-
 SQLite
 ```
 
@@ -3548,53 +3683,29 @@ Each feature is developed and then tested from a security perspective.
 
 ```text
 Application Feature
-
        ↓
-
 Understand Functionality
-
        ↓
-
 Identify Attack Surface
-
        ↓
-
 Identify Inputs
-
        ↓
-
 Trace Data Flow
-
        ↓
-
 Create Hypothesis
-
        ↓
-
 Establish Baseline
-
        ↓
-
 Manual Testing
-
        ↓
-
 Confirm Vulnerability
-
        ↓
-
 Controlled Exploitation
-
        ↓
-
 Impact Assessment
-
        ↓
-
 Remediation
-
        ↓
-
 Retesting
 ```
 
@@ -3611,37 +3722,21 @@ The project emphasizes the following questions:
 
 ```text
 Where is the input?
-
         ↓
-
 Who controls it?
-
         ↓
-
 Where does it go?
-
         ↓
-
 Which component processes it?
-
         ↓
-
 What parser interprets it?
-
         ↓
-
 What is the final sink?
-
         ↓
-
 Can I access something I should not?
-
         ↓
-
 Can I modify something I should not?
-
         ↓
-
 Can I execute something I should not?
 ```
 
@@ -3649,21 +3744,13 @@ The core security-testing model is:
 
 ```text
 Input
-
   ↓
-
 Context
-
   ↓
-
 Parser
-
   ↓
-
 Sink
-
   ↓
-
 Security Impact
 ```
 
@@ -3688,48 +3775,31 @@ Current application functionality includes:
 - Controlled server-side execution testing
 - Dedicated SQL Injection training laboratory
 - Dedicated Path Traversal training laboratory
+- Dedicated Clickjacking training laboratory
+- Multistep card-data disclosure simulation using fake laboratory data
 
 Current security coverage:
 
 ```text
 ✅ BOLA / IDOR
-
 ✅ Mass Assignment
-
 ✅ Privilege Escalation
-
 ✅ Information Disclosure
-
 ✅ SQL Injection
-
 ✅ Stored XSS
-
 ✅ Reflected XSS
-
 ✅ DOM XSS
-
 ✅ JavaScript-context XSS
-
 ✅ HTML-context XSS
-
 ✅ Path Traversal
-
 ✅ Command Injection
-
 ✅ Insecure File Upload
-
 ✅ Upload Filename Path Traversal
-
 ✅ Server-Side Code Execution
-
 ✅ Missing Rate Limiting
-
 ✅ JWT Security Testing
-
 ✅ Hardcoded JWT Secret
-
 ✅ CSRF
-
 ✅ SSRF
 ```
 
@@ -3741,49 +3811,27 @@ The dedicated SQL Injection laboratory currently contains:
 
 ```text
 ✅ In-Band SQL Injection
-
 ✅ Boolean SQL Injection Testing
-
 ✅ Column Count Enumeration
-
 ✅ UNION-Based SQL Injection
-
 ✅ SQLite DBMS Fingerprinting
-
 ✅ SQLite Table Enumeration
-
 ✅ SQLite Column Enumeration
-
 ✅ Data Extraction
-
 ✅ Conditional Response Blind SQLi
-
 ✅ TRUE / FALSE Response Oracle
-
 ✅ EXISTS Enumeration
-
 ✅ Password Length Enumeration
-
 ✅ Character Extraction Methodology
-
 ✅ Burp Intruder Enumeration Workflow
-
 ✅ Conditional Error SQLi
-
 ✅ SQL Context Identification
-
 ✅ Injected SQL Execution Confirmation
-
 ✅ Users Table Confirmation
-
 ✅ TRUE / FALSE Error Oracle
-
 ✅ Target User Identification
-
 ✅ Password Length Enumeration
-
 ✅ Character Extraction Methodology
-
 ✅ Burp Intruder Extraction Workflow
 ```
 
@@ -3791,25 +3839,15 @@ The Error-Based character extraction workflow follows the same fundamental enume
 
 ```text
 Select Character Position
-
         ↓
-
 Test Candidate Characters
-
         ↓
-
 Observe TRUE / FALSE Signal
-
         ↓
-
 Identify Correct Character
-
         ↓
-
 Move to Next Position
-
         ↓
-
 Repeat
 ```
 
@@ -3823,33 +3861,19 @@ The tester should be able to explain:
 
 ```text
 Where does my input enter?
-
         ↓
-
 What is the SQL context?
-
         ↓
-
 How is the query constructed?
-
         ↓
-
 What DBMS is being used?
-
         ↓
-
 What signal do I have?
-
         ↓
-
 How can I enumerate information?
-
         ↓
-
 How can I extract data?
-
         ↓
-
 What is the impact?
 ```
 
@@ -3857,29 +3881,17 @@ The project therefore separates:
 
 ```text
 Detection
-
     ↓
-
 Confirmation
-
     ↓
-
 Enumeration
-
     ↓
-
 Extraction
-
     ↓
-
 Impact
-
     ↓
-
 Remediation
-
     ↓
-
 Retesting
 ```
 
@@ -3900,6 +3912,8 @@ The laboratory will continue to evolve with additional:
 - File handling scenarios
 - HTTP security testing
 - Advanced JWT scenarios
+- Advanced browser security scenarios
+- Clickjacking remediation and retesting
 - Time-Based Blind SQL Injection
 - OAST / Out-of-Band SQL Injection
 - SQL Injection in JSON request bodies
@@ -3943,33 +3957,19 @@ The laboratory is also designed to develop the ability to explain:
 
 ```text
 What the application does
-
         ↓
-
 Where attacker-controlled input enters
-
         ↓
-
 How the input is processed
-
         ↓
-
 Why the vulnerability exists
-
         ↓
-
 How the vulnerability can be exploited
-
         ↓
-
 What the impact is
-
         ↓
-
 How to remediate it
-
         ↓
-
 How to retest the fix
 ```
 
@@ -3983,11 +3983,8 @@ Typical workflow:
 
 ```bash
 git status
-
 git add .
-
 git commit -m "Update Path Traversal training lab"
-
 git push origin main
 ```
 
@@ -4021,4 +4018,4 @@ Cybersecurity / Penetration Testing Learning Project
 
 Technologies and security concepts practiced:
 
-**ASP.NET Core · C# · EF Core · SQLite · REST APIs · JWT · JavaScript · Burp Suite · Web Application Security · API Security · Penetration Testing**
+**ASP.NET Core · C# · EF Core · SQLite · REST APIs · JWT · JavaScript · Burp Suite · Clickjacking · Web Application Security · API Security · Penetration Testing**

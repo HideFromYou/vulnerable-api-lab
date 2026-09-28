@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NovaBank - Change Email</title>
+</head>
+<body>
+
+    <h1>NovaBank</h1>
+
+    <h2>Login</h2>
+
+    <input
+        type="text"
+        id="username"
+        placeholder="Username"
+    >
+
+    <button id="loginBtn">Login</button>
+
+    <p id="loginStatus"></p>
+
+    <hr>
+
+    <h2>Change Email</h2>
+
+    <form id="changeEmailForm">
+
+        <input
+            type="hidden"
+            name="__RequestVerificationToken"
+            id="csrfToken"
+        >
+
+        <input
+            type="email"
+            name="email"
+            id="email"
+            placeholder="New email"
+            required
+        >
+
+        <button type="submit">Change Email</button>
+
+    </form>
+
+    <p id="result"></p>
+
+    <script>
+     
+    if (window.top !== window.self) {
+        window.top.location = window.self.location;
+    }
+
+        const API = "http://localhost:5066";
+
+        let csrfToken = "";
+
+        // Get CSRF token using the existing authenticated session
+        async function getCsrfToken() {
+
+            const response = await fetch(
+                `${API}/api/clickjacking/csrf`,
+                {
+                    method: "GET",
+                    credentials: "include"
+                }
+            );
+
+            if (!response.ok) {
+                document.getElementById("loginStatus").textContent =
+                    "No authenticated session";
+                return;
+            }
+
+            const data = await response.json();
+
+            csrfToken = data.csrfToken;
+
+            document.getElementById("csrfToken").value = csrfToken;
+        }
+
+        // Prefill email from URL parameter
+        const params = new URLSearchParams(window.location.search);
+        const prefilledEmail = params.get("email");
+
+        if (prefilledEmail) {
+            document.getElementById("email").value = prefilledEmail;
+        }
+
+        // Login
+        document.getElementById("loginBtn").addEventListener(
+            "click",
+            async () => {
+
+                const username =
+                    document.getElementById("username").value;
+
+                const body = new URLSearchParams();
+                body.append("username", username);
+
+                const response = await fetch(
+                    `${API}/api/clickjacking/login`,
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type":
+                                "application/x-www-form-urlencoded"
+                        },
+                        body: body
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    document.getElementById("loginStatus").textContent =
+                        "Login failed";
+                    return;
+                }
+
+                csrfToken = data.csrfToken;
+
+                document.getElementById("csrfToken").value =
+                    csrfToken;
+
+                document.getElementById("loginStatus").textContent =
+                    `Logged in as user ID ${data.userId}`;
+            }
+        );
+
+        // Change email
+        document.getElementById("changeEmailForm").addEventListener(
+            "submit",
+            async (event) => {
+
+                event.preventDefault();
+
+                console.log("CHANGE EMAIL SUBMIT FIRED");
+                console.log("CSRF:", csrfToken);
+                console.log(
+                    "EMAIL:",
+                    document.getElementById("email").value
+                );
+
+                const body = new URLSearchParams();
+
+                body.append(
+                    "email",
+                    document.getElementById("email").value
+                );
+
+                body.append(
+                    "__RequestVerificationToken",
+                    csrfToken
+                );
+
+                const response = await fetch(
+                    `${API}/api/clickjacking/change-email`,
+                    {
+                        method: "POST",
+                        credentials: "include",
+                        headers: {
+                            "Content-Type":
+                                "application/x-www-form-urlencoded"
+                        },
+                        body: body
+                    }
+                );
+
+                console.log("RESPONSE:", response.status);
+
+                const data = await response.json();
+
+                document.getElementById("result").textContent =
+                    data.message || "Request completed";
+            }
+        );
+
+        // Automatically request CSRF token
+        getCsrfToken();
+
+    </script>
+
+</body>
+</html>
