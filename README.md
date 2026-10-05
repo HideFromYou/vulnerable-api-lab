@@ -4,6 +4,11 @@ Intentionally vulnerable full-stack banking-style web application and REST API b
 
 The project simulates a small banking application called **NovaBank** and is progressively developed to contain common web application and API security vulnerabilities.
 
+<p align="center">
+  <img src="docs/screenshots/login-page.png" alt="NovaBank login page of the Vulnerable API Lab" width="420">
+</p>
+<p align="center"><em>The NovaBank login page: the entry point of the lab's attack surface.</em></p>
+
 The goal is to follow a realistic penetration testing workflow rather than simply identifying vulnerabilities.
 
 ```text
