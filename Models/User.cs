@@ -11,4 +11,6 @@ public class User
     public string Password { get; set; } = string.Empty;
 
     public string Role { get; set; } = "user";
+
+    public decimal Balance { get; set; } = 1000m;
 }

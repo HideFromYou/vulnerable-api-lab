@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using vulnerable_api.Data;
 using vulnerable_api.Models;
@@ -36,6 +37,23 @@ public class TransactionsController : ControllerBase
         {
             return BadRequest("Amount must be greater than zero");
         }
+
+        // VULNERABLE (race condition): the balance check and the balance update are
+        // two separate steps with no lock or transaction around them. Parallel requests
+        // can all pass the check before any of them has deducted the money.
+        var sender = _db.Users.AsNoTracking().First(u => u.Id == senderId);
+
+        if (sender.Balance < request.Amount)
+        {
+            return BadRequest("Insufficient funds");
+        }
+
+        Thread.Sleep(100); // simulates slow processing and widens the race window
+
+        _db.Database.ExecuteSqlInterpolated(
+            $"UPDATE Users SET Balance = Balance - {request.Amount} WHERE Id = {senderId}");
+        _db.Database.ExecuteSqlInterpolated(
+            $"UPDATE Users SET Balance = Balance + {request.Amount} WHERE Id = {request.RecipientId}");
 
         var transaction = new Transaction
         {
