@@ -1,5 +1,9 @@
 # Vulnerable API Lab
 
+> [!WARNING]
+> **Intentionally vulnerable. For local, educational use only.**
+> This application contains deliberate security flaws (including remote code execution and file read/write issues). Run it only on your own machine, never expose it to a network or the internet, and never deploy it to a server.
+
 Intentionally vulnerable full-stack banking-style web application and REST API built for penetration testing, exploitation, remediation, retesting, and security testing practice.
 
 The project simulates a small banking application called **NovaBank** and is progressively developed to contain common web application and API security vulnerabilities.
@@ -73,8 +77,8 @@ The frontend provides a realistic attack surface for testing:
 - Transaction functionality
 - Browser DevTools
 - Burp Suite interception
--Clickjacking
--Path/Directory Traversal
+- Clickjacking
+- Path/Directory Traversal
 
 ---
 
