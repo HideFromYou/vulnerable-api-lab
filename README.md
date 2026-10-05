@@ -238,7 +238,7 @@ The project focuses on understanding:
 
 # Security Testing Coverage
 
-## 20 / 20 Checked
+## 21 / 21 Checked
 
 | # | Finding | Status |
 |---|---|---|
@@ -262,6 +262,7 @@ The project focuses on understanding:
 | 18 | Hardcoded JWT Secret | ✅ |
 | 19 | CSRF | ✅ |
 | 20 | SSRF | ✅ |
+| 21 | Race Condition (non-atomic balance transfer) | ✅ |
 
 # Additional Advanced Browser-Security Training
 
@@ -3450,7 +3451,6 @@ Potential future testing areas include:
 - Negative amounts
 - Unexpected values
 - Recipient manipulation
-- Race conditions
 - Sensitive transaction data exposure
 
 ---
@@ -3919,7 +3919,6 @@ The laboratory will continue to evolve with additional:
 - API security issues
 - Business logic vulnerabilities
 - Transaction security testing
-- Race conditions
 - Security misconfigurations
 - Additional XSS contexts
 - File handling scenarios
