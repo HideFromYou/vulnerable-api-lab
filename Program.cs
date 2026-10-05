@@ -54,6 +54,35 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Lab safety guard: the remote-code-execution endpoints must never be reachable
+// from another website open in your browser, or from another machine.
+// The intentional flaws stay exploitable from curl, Burp Suite and the NovaBank frontend.
+var dangerousPaths = new[] { "/api/execution", "/api/users/ping", "/api/users/upload" };
+var trustedOrigins = new[] { "http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:5066", "https://localhost:7098" };
+
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value ?? "";
+    if (dangerousPaths.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
+    {
+        var remote = context.Connection.RemoteIpAddress;
+        var fetchSite = context.Request.Headers["Sec-Fetch-Site"].ToString();
+        var origin = context.Request.Headers.Origin.ToString();
+
+        var notLoopback = remote is null || !System.Net.IPAddress.IsLoopback(remote);
+        var crossSite = fetchSite == "cross-site";
+        var foreignOrigin = origin != "" && !trustedOrigins.Contains(origin);
+
+        if (notLoopback || crossSite || foreignOrigin)
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await context.Response.WriteAsync("Blocked by lab safety guard: local requests only.");
+            return;
+        }
+    }
+    await next();
+});
+
 app.UseCors("FrontendPolicy");
 
 app.UseAuthentication();

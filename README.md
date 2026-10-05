@@ -3,6 +3,8 @@
 > [!WARNING]
 > **Intentionally vulnerable. For local, educational use only.**
 > This application contains deliberate security flaws (including remote code execution and file read/write issues). Run it only on your own machine, never expose it to a network or the internet, and never deploy it to a server.
+>
+> As a safety net, the code-execution endpoints (`/api/execution`, `/api/users/ping`, `/api/users/upload`) refuse requests coming from other websites in your browser or from other machines, and `AllowedHosts` is limited to `localhost`/`127.0.0.1`. The vulnerabilities themselves stay fully exploitable from curl, Burp Suite and the NovaBank frontend.
 
 Intentionally vulnerable full-stack banking-style web application and REST API built for penetration testing, exploitation, remediation, retesting, and security testing practice.
 
